@@ -1,9 +1,28 @@
 // NetworkStatusPanel — a SiteCard per store, grouped implicitly by the
 // XL/L/M/S value scale (badge color) rather than a separate legend.
 
-export function renderNetworkStatus(sites) {
+export function renderNetworkStatus(sites, activeSiteTypes = null) {
   const container = document.getElementById("site-cards");
-  container.innerHTML = sites.map(siteCardHtml).join("");
+  const visible = activeSiteTypes ? sites.filter((s) => activeSiteTypes.has(s.siteType)) : sites;
+  container.innerHTML = visible.map(siteCardHtml).join("");
+}
+
+// Wired once — the filter toggles are static markup, not re-rendered per
+// poll tick, so state.siteTypeFilter (owned by main.js) is the only thing
+// that changes across refreshes.
+export function initSiteFilter({ onChange }) {
+  const buttons = [...document.querySelectorAll("#site-filter .site-filter__btn")];
+  buttons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      btn.classList.toggle("is-active");
+      btn.setAttribute("aria-pressed", String(btn.classList.contains("is-active")));
+      onChange(activeTypesFrom(buttons));
+    });
+  });
+}
+
+function activeTypesFrom(buttons) {
+  return new Set(buttons.filter((b) => b.classList.contains("is-active")).map((b) => b.dataset.siteType));
 }
 
 function siteCardHtml(site) {
