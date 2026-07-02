@@ -132,23 +132,30 @@
   color: var(--color-text-muted);
 }
 
-.site-card__dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
+.site-card__badge {
+  display: inline-block;
   flex: none;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
 }
-.site-card.type-XL .site-card__dot {
+.site-card.type-XL .site-card__badge {
   background: var(--color-site-xl);
+  color: var(--color-site-xl-strong);
 }
-.site-card.type-L .site-card__dot {
+.site-card.type-L .site-card__badge {
   background: var(--color-site-l);
+  color: var(--color-site-l-strong);
 }
-.site-card.type-M .site-card__dot {
+.site-card.type-M .site-card__badge {
   background: var(--color-site-m);
+  color: var(--color-site-m-strong);
 }
-.site-card.type-S .site-card__dot {
+.site-card.type-S .site-card__badge {
   background: var(--color-site-s);
+  color: var(--color-site-s-strong);
 }
 
 /* Card title (H3 role) — DESIGN.md: 500 weight, tight tracking, 1.2 line-height */
@@ -163,14 +170,15 @@
 .site-card__stats {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 10px;
 }
 
-.site-card__stat {
+.site-card__stat-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
+  margin-bottom: 4px;
 }
 
 .site-card__stat-label {
@@ -181,7 +189,7 @@
 
 /* Mono is reserved for actual numbers — the utility/data face, kept out of
    labels and titles so it reads as data rather than as the card's voice. */
-.site-card__stat-value {
+.site-card__stat-current {
   font-family: var(--font-mono);
   font-size: 13px;
   font-weight: 600;
@@ -189,16 +197,60 @@
   white-space: nowrap;
 }
 
-.site-card__stat-sub {
-  margin-left: 4px;
-  font-weight: 400;
+/* Gauge: filled bar = current stock; two ticks mark Operating Threshold
+   (static hard floor) and min_buffer (dynamic soft floor) on the same
+   track, so their relative position is legible without reading CONTEXT.md. */
+.site-card__gauge {
+  position: relative;
+  height: 5px;
+  border-radius: var(--radius-pill);
+  background: var(--color-canvas);
+  overflow: visible;
+}
+
+.site-card__gauge-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--color-text-charcoal);
+}
+
+.site-card__gauge-mark {
+  position: absolute;
+  top: -2px;
+  width: 2px;
+  height: 9px;
+  border-radius: 1px;
+  transform: translateX(-1px);
+}
+.site-card__gauge-mark--threshold {
+  background: var(--color-text-muted);
+}
+.site-card__gauge-mark--buffer {
+  background: var(--color-link);
+}
+
+.site-card__stat-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 5px;
+  font-size: 10px;
   color: var(--color-text-muted);
-  font-size: 11px;
+}
+.site-card__stat-legend b {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--color-text-charcoal);
 }
 
 .site-card__stat.is-low .site-card__stat-label,
-.site-card__stat.is-low .site-card__stat-value {
+.site-card__stat.is-low .site-card__stat-current {
   color: var(--color-signal);
+}
+.site-card__stat.is-low .site-card__gauge-fill {
+  background: var(--color-signal);
 }
 
 /* ==========================================================================
