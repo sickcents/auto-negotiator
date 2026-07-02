@@ -25,13 +25,19 @@
   --color-clay: #9a3a0a; /* Clay Brown */
   --color-link: #3860be; /* Link Blue — informational/agent-thought accents */
 
-  /* Site Type is ordinal (XL > L > M > S capacity) — mapped to a warm→neutral
-     value scale rather than arbitrary categorical hues, so the palette itself
-     encodes the hierarchy. */
-  --color-site-xl: var(--color-ink);
-  --color-site-l: var(--color-clay);
-  --color-site-m: var(--color-signal-light);
-  --color-site-s: var(--color-text-muted);
+  /* Site Type badge palette — one pastel hue per Site Type, additive on top
+     of the core Mastercard-inspired palette. Shared across the Site Card
+     badge and (later) the Ops Map markers, so a site reads identically in
+     both places. Each type has a soft `-*` background and a `-*-strong`
+     foreground of the same hue for legible badge text/gauge marks. */
+  --color-site-xl: #f2d6c3;
+  --color-site-xl-strong: #9a3a0a;
+  --color-site-l: #f5e2ab;
+  --color-site-l-strong: #8a6112;
+  --color-site-m: #d6e8d3;
+  --color-site-m-strong: #3f6b46;
+  --color-site-s: #d3ddf3;
+  --color-site-s-strong: #3860be;
 
   --color-border: rgba(20, 20, 19, 0.12);
   --color-border-on-ink: rgba(243, 240, 238, 0.18);
