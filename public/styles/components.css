@@ -67,10 +67,7 @@
 .console-grid {
   display: grid;
   grid-template-columns: minmax(300px, 1fr) minmax(380px, 1.35fr);
-  grid-template-areas:
-    "network map"
-    "sim map"
-    "transfers detail";
+  grid-template-areas: "transfers detail";
   align-items: start;
   gap: var(--space-3);
   max-width: 1280px;
@@ -78,15 +75,6 @@
   padding: 0 var(--space-3) var(--space-6);
 }
 
-.panel--network {
-  grid-area: network;
-}
-.panel--map {
-  grid-area: map;
-}
-.panel--sim {
-  grid-area: sim;
-}
 .panel--transfers {
   grid-area: transfers;
 }
@@ -102,6 +90,53 @@
 }
 
 /* ==========================================================================
+   Map stage — the Ops Map as a full-bleed hero layer, with Network Status
+   and Simulate Incident floating over it rather than sharing a grid cell.
+   ========================================================================== */
+
+.map-stage {
+  position: relative;
+  max-width: 1280px;
+  height: 680px;
+  margin: var(--space-3) auto;
+}
+
+.map-stage .map-frame {
+  position: absolute;
+  inset: 0;
+  height: auto;
+  z-index: 1;
+  border-radius: var(--radius-signal);
+  /* Leaflet's tile pane is GPU-composited (transform: translate3d); pin
+     this to its own stacking context so that layer promotion can never
+     paint over the floating panels above it. */
+  isolation: isolate;
+}
+
+.floating-panel {
+  position: absolute;
+  z-index: 2;
+  width: 300px;
+  overflow-y: auto;
+  box-shadow: var(--shadow-2);
+}
+
+.floating-panel--network {
+  top: var(--space-3);
+  bottom: var(--space-3);
+  left: var(--space-3);
+}
+
+.floating-panel--sim {
+  top: var(--space-3);
+  right: var(--space-3);
+  width: 30%;
+  min-width: 280px;
+  max-width: 380px;
+  max-height: calc(100% - 2 * var(--space-3));
+}
+
+/* ==========================================================================
    Network Status — Site cards
    ========================================================================== */
 
@@ -109,6 +144,12 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-2);
+}
+
+/* The floating Network Status panel is a narrow sidebar, not a full grid
+   cell — one column reads far better than two cramped ones. */
+.floating-panel--network .site-cards {
+  grid-template-columns: 1fr;
 }
 
 .site-card {
@@ -626,14 +667,30 @@
   .console-grid {
     grid-template-columns: 1fr;
     grid-template-areas:
-      "map"
-      "network"
-      "sim"
       "transfers"
       "detail";
   }
-  .map-frame {
+
+  /* Floating panels only work with room to spare either side of the map;
+     below that, stack map → network → sim like plain panels instead. */
+  .map-stage {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: 0 var(--space-3);
+  }
+  .map-stage .map-frame {
+    position: static;
     height: 320px;
+  }
+  .floating-panel,
+  .floating-panel--network,
+  .floating-panel--sim {
+    position: static;
+    width: auto;
+    max-width: none;
+    max-height: none;
   }
 }
 
