@@ -1,22 +1,29 @@
-// MapPanel — the signature element. Reuses DESIGN.md's "orbital arc between
-// circular portraits" motif, but the arc is no longer decorative: it *is*
-// the donor -> receiver route for whichever Transfer(s) are currently open,
-// same as the haversine ranking the backend actually runs (PRD Section 7).
+// MapPanel — the signature element. Per ADR-0003, Site coordinates are real
+// Eastern Singapore MRT stations that already drive the backend's haversine
+// distance logic, so the map renders that geography literally on real
+// OpenStreetMap tiles (via Leaflet, loaded from CDN in index.html) instead
+// of the old hand-rolled SVG projection.
 
 import { ACTIVE_ROUTE_STATUSES } from "../format.js";
 
-const VIEW = 400;
-const PAD = 34;
-const MARKER_RADIUS = { XL: 9, L: 7.5, M: 6.5, S: 5.5 };
+const MARKER_SIZE = [40, 20];
+const OSM_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+const OSM_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+let map = null;
+let markerLayer = null;
+let routeLayer = null;
 
 export function renderMap(sites, transfers = [], selectedTransferId = null) {
-  const svg = document.getElementById("map");
   if (sites.length === 0) return;
+  ensureMap(sites);
 
-  const project = makeProjector(sites);
+  markerLayer.clearLayers();
+  routeLayer.clearLayers();
+
   const bySiteId = new Map(sites.map((s) => [s.id, s]));
 
-  const routes = transfers
+  transfers
     .filter(
       (t) =>
         t.donorSiteId &&
@@ -24,79 +31,75 @@ export function renderMap(sites, transfers = [], selectedTransferId = null) {
         bySiteId.has(t.donorSiteId) &&
         bySiteId.has(t.receiverSiteId)
     )
-    .map((t) => routeArcHtml(project(bySiteId.get(t.donorSiteId)), project(bySiteId.get(t.receiverSiteId)), t.id === selectedTransferId))
-    .join("");
+    .forEach((t) => {
+      const donor = bySiteId.get(t.donorSiteId);
+      const receiver = bySiteId.get(t.receiverSiteId);
+      const selected = t.id === selectedTransferId;
+      L.polyline(curvedLatLngs(donor, receiver), {
+        className: selected ? "map-route map-route--selected" : "map-route",
+        interactive: false,
+      }).addTo(routeLayer);
+    });
 
-  const markers = sites.map((site) => siteMarkerHtml(site, project(site))).join("");
-
-  svg.innerHTML = `<g>${routes}</g><g>${markers}</g>`;
-}
-
-// Wire hover once — markers are re-rendered often, but this listens on the
-// stable <svg> parent via delegation rather than re-binding per marker.
-export function initMapTooltip() {
-  const frame = document.getElementById("map-frame");
-  const svg = document.getElementById("map");
-  const tooltip = document.getElementById("map-tooltip");
-
-  svg.addEventListener("pointerover", (event) => {
-    const marker = event.target.closest(".map-site");
-    if (!marker) return;
-    const data = JSON.parse(decodeURIComponent(marker.dataset.site));
-    const frameRect = frame.getBoundingClientRect();
-    const markerRect = marker.getBoundingClientRect();
-    tooltip.style.left = `${markerRect.left + markerRect.width / 2 - frameRect.left}px`;
-    tooltip.style.top = `${markerRect.top - frameRect.top}px`;
-    tooltip.innerHTML = `
-      <div class="map-tooltip__title">${data.name} · ${data.siteType}</div>
-      <div class="map-tooltip__row">Scanners ${data.scanners} · Printers ${data.printers}</div>`;
-    tooltip.hidden = false;
-  });
-
-  svg.addEventListener("pointerout", (event) => {
-    if (event.target.closest(".map-site")) tooltip.hidden = true;
+  sites.forEach((site) => {
+    L.marker([site.lat, site.lng], { icon: siteIcon(site) })
+      .bindTooltip(siteTooltipHtml(site), { className: "map-tooltip", direction: "top", offset: [0, -10] })
+      .addTo(markerLayer);
   });
 }
 
-function makeProjector(sites) {
-  const lats = sites.map((s) => s.lat);
-  const lngs = sites.map((s) => s.lng);
-  const [minLat, maxLat] = [Math.min(...lats), Math.max(...lats)];
-  const [minLng, maxLng] = [Math.min(...lngs), Math.max(...lngs)];
-  return (site) => ({
-    x: PAD + ((site.lng - minLng) / (maxLng - minLng || 1)) * (VIEW - 2 * PAD),
-    // Flip Y: higher latitude = further "up" on screen.
-    y: VIEW - PAD - ((site.lat - minLat) / (maxLat - minLat || 1)) * (VIEW - 2 * PAD),
-  });
-}
+// The old manual pointer-event delegation for a hand-positioned tooltip div
+// is gone — each marker now binds its own Leaflet tooltip in renderMap.
+// Kept exported (as a no-op) so main.js's call site doesn't need to change.
+export function initMapTooltip() {}
 
-function siteMarkerHtml(site, { x, y }) {
-  const r = MARKER_RADIUS[site.siteType] ?? 6;
-  const payload = encodeURIComponent(
-    JSON.stringify({
-      name: site.name,
-      siteType: site.siteType,
-      scanners: `${site.currentScanners}/${site.operatingThresholdScanners}`,
-      printers: `${site.currentPrinters}/${site.operatingThresholdPrinters}`,
-    })
+function ensureMap(sites) {
+  if (map) return map;
+
+  map = L.map("map", { attributionControl: true }).fitBounds(
+    L.latLngBounds(sites.map((s) => [s.lat, s.lng])).pad(0.25)
   );
-  return `<g class="map-site" data-site="${payload}" transform="translate(${x},${y})">
-    <circle r="${r}" style="fill: var(--color-site-${site.siteType.toLowerCase()})"></circle>
-    <text x="${r + 5}" y="3">${site.name}</text>
-  </g>`;
+  L.tileLayer(OSM_TILE_URL, { attribution: OSM_ATTRIBUTION, maxZoom: 19 }).addTo(map);
+  markerLayer = L.layerGroup().addTo(map);
+  routeLayer = L.layerGroup().addTo(map);
+  return map;
 }
 
-function routeArcHtml(a, b, selected) {
-  const mx = (a.x + b.x) / 2;
-  const my = (a.y + b.y) / 2;
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  const len = Math.hypot(dx, dy) || 1;
-  // Perpendicular bow gives the path its hand-traced, orbiting feel
-  // instead of a perfectly straight CSS line.
-  const bow = Math.min(40, len * 0.22);
-  const cx = mx + (-dy / len) * bow;
-  const cy = my + (dx / len) * bow;
-  const cls = selected ? "map-route map-route--selected" : "map-route";
-  return `<path class="${cls}" d="M ${a.x} ${a.y} Q ${cx} ${cy} ${b.x} ${b.y}"></path>`;
+function siteIcon(site) {
+  return L.divIcon({
+    className: "map-marker-icon",
+    html: `<span class="map-marker map-marker--${site.siteType}">[${site.siteType}]</span>`,
+    iconSize: MARKER_SIZE,
+    iconAnchor: [MARKER_SIZE[0] / 2, MARKER_SIZE[1] / 2],
+  });
+}
+
+function siteTooltipHtml(site) {
+  return `
+    <div class="map-tooltip__title">${site.name} · ${site.siteType}</div>
+    <div class="map-tooltip__row">Scanners ${site.currentScanners}/${site.operatingThresholdScanners} · Printers ${site.currentPrinters}/${site.operatingThresholdPrinters}</div>`;
+}
+
+// Perpendicular-bow quadratic bezier sampled into a polyline — the same
+// hand-traced, orbiting-arc feel as the old SVG route, just in lat/lng
+// space so it bows relative to real donor/receiver distance.
+function curvedLatLngs(donor, receiver) {
+  const dLat = receiver.lat - donor.lat;
+  const dLng = receiver.lng - donor.lng;
+  const len = Math.hypot(dLat, dLng) || 1;
+  const bow = Math.min(0.006, len * 0.22);
+  const cLat = (donor.lat + receiver.lat) / 2 + (-dLng / len) * bow;
+  const cLng = (donor.lng + receiver.lng) / 2 + (dLat / len) * bow;
+
+  const steps = 24;
+  const points = [];
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const it = 1 - t;
+    points.push([
+      it * it * donor.lat + 2 * it * t * cLat + t * t * receiver.lat,
+      it * it * donor.lng + 2 * it * t * cLng + t * t * receiver.lng,
+    ]);
+  }
+  return points;
 }
