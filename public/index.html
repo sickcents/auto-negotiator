@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Auto Negotiator — ClickShop Network</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/styles/tokens.css" />
+  <link rel="stylesheet" href="/styles/base.css" />
+  <link rel="stylesheet" href="/styles/components.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="nav-pill">
+      <div class="nav-pill__brand">
+        <span class="nav-pill__mark" aria-hidden="true"></span>
+        <div>
+          <p class="nav-pill__title">Auto Negotiator</p>
+          <p class="nav-pill__subtitle">ClickShop Network — Eastern Singapore</p>
+        </div>
+      </div>
+      <p class="nav-pill__status" id="nav-status">Loading network…</p>
+    </header>
+
+    <!--
+      Component hierarchy (mirrored 1:1 by public/js/components/*):
+        AppShell
+        ├── Nav                     (live counts pill)
+        ├── NetworkStatusPanel      → SiteCard × N
+        ├── MapPanel                → SiteMarker × N, RouteArc × active transfers
+        ├── SimulationControlsPanel
+        ├── TransfersPanel          → TransferRow × N
+        └── TransferDetailPanel
+            ├── AgentConsole
+            ├── ManagerReplyPanel
+            └── RegionalOverridePanel
+    -->
+    <main class="console-grid">
+      <section class="panel panel--network" aria-labelledby="network-heading">
+        <h2 class="eyebrow" id="network-heading">Network Status</h2>
+        <div id="site-cards" class="site-cards"></div>
+      </section>
+
+      <section class="panel panel--map" aria-labelledby="map-heading">
+        <h2 class="eyebrow" id="map-heading">Ops Map — Eastern Singapore</h2>
+        <div class="map-frame" id="map-frame">
+          <svg id="map" viewBox="0 0 400 400" class="map" role="img" aria-label="Map of ClickShop sites across Eastern Singapore"></svg>
+          <div class="map-tooltip" id="map-tooltip" hidden></div>
+        </div>
+      </section>
+
+      <section class="panel panel--sim" aria-labelledby="sim-heading">
+        <h2 class="eyebrow" id="sim-heading">Simulate Incident</h2>
+        <div class="controls-row">
+          <select id="sim-site" class="select" aria-label="Site"></select>
+          <select id="sim-hardware" class="select" aria-label="Hardware type">
+            <option value="scanner">Scanner (TC58)</option>
+            <option value="printer">Printer (ZQ521)</option>
+          </select>
+          <input id="sim-drop-to" type="number" value="0" min="0" class="input input--qty" aria-label="Drop stock to" />
+          <button id="sim-btn" class="btn btn--primary">Trigger shortage</button>
+        </div>
+        <p id="sim-result" class="hint"></p>
+      </section>
+
+      <section class="panel panel--transfers" aria-labelledby="transfers-heading">
+        <h2 class="eyebrow" id="transfers-heading">Transfers</h2>
+        <div id="transfer-list" class="transfer-list"></div>
+      </section>
+
+      <section class="panel panel--detail" id="transfer-detail" hidden aria-labelledby="detail-heading">
+        <div class="detail-header">
+          <h2 id="detail-heading">Transfer <span id="detail-id"></span></h2>
+          <p id="detail-status" class="status-pill"></p>
+        </div>
+
+        <div class="console-frame">
+          <div class="console-frame__header">
+            <h3 class="eyebrow eyebrow--on-ink">Agent Console</h3>
+            <button id="console-copy-btn" class="btn btn--ghost-on-ink">Copy</button>
+          </div>
+          <div id="agent-console" class="console"></div>
+        </div>
+
+        <div class="detail-block">
+          <h3 class="detail-block__title">Manager Reply Injection</h3>
+          <div class="controls-row">
+            <button class="btn btn--outline preset-btn" data-preset="Huge promo tomorrow, we can't spare anything.">Cites a promo</button>
+            <button class="btn btn--outline preset-btn" data-preset="No, we need everything we have.">Refuses, no reason</button>
+            <button class="btn btn--outline preset-btn" data-preset="Understood, go ahead and take it.">Agrees</button>
+          </div>
+          <div class="controls-row">
+            <input id="reply-text" type="text" placeholder="Type a manager reply..." class="input input--grow" aria-label="Manager reply" />
+            <button id="reply-btn" class="btn btn--primary">Send reply</button>
+          </div>
+        </div>
+
+        <div class="detail-block">
+          <h3 class="detail-block__title">Regional Director Override</h3>
+          <div class="controls-row">
+            <button id="override-approve" class="btn btn--signal">Force-approve current donor</button>
+            <select id="override-donor" class="select" aria-label="Reroute donor"></select>
+            <button id="override-reroute" class="btn btn--signal">Force-reroute</button>
+          </div>
+          <p id="override-result" class="hint"></p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>

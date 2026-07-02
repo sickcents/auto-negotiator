@@ -1,0 +1,566 @@
+/* ==========================================================================
+   App shell
+   ========================================================================== */
+
+.app-shell {
+  min-height: 100vh;
+  padding-top: var(--space-4);
+}
+
+/* --- Floating nav pill ---------------------------------------------------- */
+
+.nav-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  max-width: 1280px;
+  margin: 0 auto var(--space-4);
+  padding: 12px var(--space-3);
+  background: var(--color-surface);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-1);
+}
+
+.nav-pill__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.nav-pill__mark {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 30%, var(--color-signal-light), var(--color-ink) 78%);
+}
+
+.nav-pill__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.nav-pill__subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.nav-pill__status {
+  margin: 0;
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--color-canvas);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-charcoal);
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Dashboard grid
+   ========================================================================== */
+
+.console-grid {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) minmax(380px, 1.35fr);
+  grid-template-areas:
+    "network map"
+    "sim map"
+    "transfers detail";
+  align-items: start;
+  gap: var(--space-3);
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--space-3) var(--space-6);
+}
+
+.panel--network {
+  grid-area: network;
+}
+.panel--map {
+  grid-area: map;
+}
+.panel--sim {
+  grid-area: sim;
+}
+.panel--transfers {
+  grid-area: transfers;
+}
+.panel--detail {
+  grid-area: detail;
+}
+
+.panel {
+  background: var(--color-canvas-lifted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-button);
+  padding: var(--space-3);
+}
+
+/* ==========================================================================
+   Network Status — Site cards
+   ========================================================================== */
+
+.site-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+}
+
+.site-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-button);
+  padding: 14px 16px;
+  background: var(--color-surface);
+}
+
+/* Eyebrow-style category line — Site Type + MRT is exactly the kind of
+   classification data DESIGN.md's eyebrow pattern is for. */
+.site-card__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.site-card__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: none;
+}
+.site-card.type-XL .site-card__dot {
+  background: var(--color-site-xl);
+}
+.site-card.type-L .site-card__dot {
+  background: var(--color-site-l);
+}
+.site-card.type-M .site-card__dot {
+  background: var(--color-site-m);
+}
+.site-card.type-S .site-card__dot {
+  background: var(--color-site-s);
+}
+
+/* Card title (H3 role) — DESIGN.md: 500 weight, tight tracking, 1.2 line-height */
+.site-card__name {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.site-card__stats {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.site-card__stat {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.site-card__stat-label {
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--color-text-charcoal);
+}
+
+/* Mono is reserved for actual numbers — the utility/data face, kept out of
+   labels and titles so it reads as data rather than as the card's voice. */
+.site-card__stat-value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.site-card__stat-sub {
+  margin-left: 4px;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+.site-card__stat.is-low .site-card__stat-label,
+.site-card__stat.is-low .site-card__stat-value {
+  color: var(--color-signal);
+}
+
+/* ==========================================================================
+   Ops Map (signature element)
+   ========================================================================== */
+
+.map-frame {
+  position: relative;
+  height: 420px;
+  border-radius: var(--radius-stadium);
+  background: var(--color-ink);
+  box-shadow: var(--shadow-2);
+  overflow: hidden;
+}
+
+.map {
+  width: 100%;
+  height: 100%;
+}
+
+.map-site {
+  cursor: pointer;
+}
+
+.map-site circle {
+  stroke: var(--color-canvas);
+  stroke-width: 1.5px;
+  transition: r 120ms ease;
+}
+
+.map-site:hover circle {
+  r: 9;
+}
+
+.map-site text {
+  font-family: var(--font-display);
+  font-size: 8.5px;
+  font-weight: 500;
+  fill: var(--color-text-on-ink-muted);
+}
+
+.map-route {
+  fill: none;
+  stroke: var(--color-signal-light);
+  stroke-width: 1.4px;
+  stroke-linecap: round;
+  stroke-dasharray: 3 5;
+  opacity: 0.55;
+  animation: orbit-flow 6s linear infinite;
+}
+
+.map-route--selected {
+  opacity: 0.95;
+  stroke-width: 2px;
+}
+
+@keyframes orbit-flow {
+  to {
+    stroke-dashoffset: -64;
+  }
+}
+
+.map-tooltip {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 14px));
+  background: var(--color-surface);
+  color: var(--color-ink);
+  border-radius: var(--radius-chip);
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 1.35;
+  box-shadow: var(--shadow-1);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.map-tooltip__title {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.map-tooltip__row {
+  font-family: var(--font-mono);
+  color: var(--color-text-charcoal);
+  font-size: 11px;
+}
+
+/* ==========================================================================
+   Controls (Simulate Incident, forms)
+   ========================================================================== */
+
+.controls-row {
+  display: flex;
+  gap: var(--space-1);
+  margin: var(--space-1) 0;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.select,
+.input {
+  border: 1.5px solid var(--color-ink);
+  border-radius: var(--radius-button);
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 450;
+  letter-spacing: -0.01em;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.input::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* Selects read as a chosen label, not typed text — same weight as a button
+   label — and get a custom chevron so no native browser arrow slips in. */
+.select {
+  appearance: none;
+  -webkit-appearance: none;
+  font-weight: 500;
+  padding-right: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23141413' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 10px 6px;
+  cursor: pointer;
+}
+.select:hover {
+  background-color: var(--color-canvas);
+}
+
+.input--qty {
+  width: 5.5rem;
+}
+
+.input--grow {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+
+.btn {
+  cursor: pointer;
+  border-radius: var(--radius-button);
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  border: 1.5px solid transparent;
+  transition: transform 100ms ease, opacity 100ms ease;
+}
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn--primary {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-text-on-ink);
+}
+.btn--primary:hover {
+  opacity: 0.9;
+}
+
+.btn--outline {
+  background: var(--color-surface);
+  border-color: var(--color-ink);
+  color: var(--color-ink);
+}
+.btn--outline:hover {
+  background: var(--color-canvas);
+}
+
+.btn--signal {
+  background: var(--color-signal);
+  border-color: var(--color-signal);
+  color: #fff;
+  font-size: 13px;
+  padding: 6px 18px;
+  border-radius: var(--radius-signal);
+}
+.btn--signal:hover {
+  opacity: 0.92;
+}
+
+.btn--ghost-on-ink {
+  background: transparent;
+  border-color: var(--color-border-on-ink);
+  color: var(--color-text-on-ink);
+  padding: 4px 14px;
+  font-size: 12px;
+}
+.btn--ghost-on-ink:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ==========================================================================
+   Transfers list
+   ========================================================================== */
+
+.transfer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.transfer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-button);
+  padding: 10px 16px;
+  background: var(--color-surface);
+  cursor: pointer;
+  font-size: 13.5px;
+}
+.transfer-row:hover {
+  background: var(--color-canvas);
+}
+.transfer-row.is-selected {
+  border-color: var(--color-ink);
+}
+
+/* Status pill — tone maps to TransferStatus */
+.status-pill {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 14px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+.status-pill--neutral {
+  background: var(--color-canvas);
+  color: var(--color-text-muted);
+}
+.status-pill--info {
+  background: rgba(56, 96, 190, 0.12);
+  color: var(--color-link);
+}
+.status-pill--ink {
+  background: var(--color-ink);
+  color: var(--color-text-on-ink);
+}
+.status-pill--signal {
+  background: rgba(207, 69, 0, 0.12);
+  color: var(--color-signal);
+}
+.status-pill--transit {
+  background: rgba(243, 115, 56, 0.16);
+  color: var(--color-clay);
+}
+.status-pill--done {
+  background: var(--color-canvas);
+  color: var(--color-text-charcoal);
+}
+
+/* ==========================================================================
+   Transfer Detail
+   ========================================================================== */
+
+.detail-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+.detail-header h2 {
+  font-size: 20px;
+}
+
+.detail-block {
+  margin-top: var(--space-3);
+}
+
+.detail-block__title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--color-text-muted);
+}
+
+/* --- Agent Console — the other "media frame" surface -------------------- */
+
+.console-frame {
+  background: var(--color-ink);
+  border-radius: var(--radius-stadium);
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  box-shadow: var(--shadow-2);
+}
+
+.console-frame__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.console {
+  color: var(--color-text-on-ink);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.55;
+  height: 260px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+.console .line {
+  margin-bottom: 10px;
+}
+.console .thought {
+  color: var(--color-text-on-ink-muted);
+}
+.console .tool {
+  color: var(--color-signal-light);
+}
+.console .message-agent {
+  color: #bfe3c9;
+}
+.console .message-manager {
+  color: #f3a897;
+}
+.console .message-regional_director {
+  color: #a9c2f0;
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 1023px) {
+  .console-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "map"
+      "network"
+      "sim"
+      "transfers"
+      "detail";
+  }
+  .map-frame {
+    height: 320px;
+  }
+}
+
+@media (max-width: 599px) {
+  .site-cards {
+    grid-template-columns: 1fr;
+  }
+  .nav-pill {
+    border-radius: var(--radius-stadium);
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

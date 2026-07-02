@@ -1,0 +1,61 @@
+/*
+  Design tokens — derived from DESIGN.md (Mastercard-inspired system),
+  adapted for an operational console rather than a marketing page.
+  Every value here should trace back to a named color/type/radius in
+  DESIGN.md; component CSS should reference these vars, never raw hex.
+*/
+
+:root {
+  /* --- Color: surfaces --------------------------------------------- */
+  --color-canvas: #f3f0ee; /* Canvas Cream — page background */
+  --color-canvas-lifted: #fcfbfa; /* Lifted Cream — nested/raised panels */
+  --color-surface: #ffffff; /* White — nav pill, cards, chips */
+  --color-ink: #141413; /* Ink Black — primary CTAs, headline text, dark frames */
+
+  /* --- Color: text ---------------------------------------------------- */
+  --color-text: #141413;
+  --color-text-charcoal: #262627;
+  --color-text-muted: #696969; /* Slate Gray */
+  --color-text-on-ink: #f3f0ee; /* cream, not pure white, on ink surfaces */
+  --color-text-on-ink-muted: #d1cdc7; /* Dust Taupe, muted labels on dark frames */
+
+  /* --- Color: signal & ordinal scale ----------------------------------- */
+  --color-signal: #cf4500; /* Signal Orange — reserved for alerts/escalation, never marketing CTAs */
+  --color-signal-light: #f37338; /* Light Signal Orange — orbital route lines, in-transit accents */
+  --color-clay: #9a3a0a; /* Clay Brown */
+  --color-link: #3860be; /* Link Blue — informational/agent-thought accents */
+
+  /* Site Type is ordinal (XL > L > M > S capacity) — mapped to a warm→neutral
+     value scale rather than arbitrary categorical hues, so the palette itself
+     encodes the hierarchy. */
+  --color-site-xl: var(--color-ink);
+  --color-site-l: var(--color-clay);
+  --color-site-m: var(--color-signal-light);
+  --color-site-s: var(--color-text-muted);
+
+  --color-border: rgba(20, 20, 19, 0.12);
+  --color-border-on-ink: rgba(243, 240, 238, 0.18);
+
+  /* --- Type -------------------------------------------------------------- */
+  --font-display: "Sofia Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+
+  /* --- Radius scale (deliberately no 8-16px middle ground) ------------- */
+  --radius-chip: 6px;
+  --radius-button: 20px;
+  --radius-signal: 24px;
+  --radius-stadium: 40px;
+  --radius-pill: 999px;
+
+  /* --- Shadow (atmospheric cushioning, never hard-edged) ---------------- */
+  --shadow-1: rgba(0, 0, 0, 0.04) 0px 4px 24px 0px;
+  --shadow-2: rgba(0, 0, 0, 0.08) 0px 24px 48px 0px;
+
+  /* --- Space (8px scale) ------------------------------------------------ */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 48px;
+  --space-6: 64px;
+}
