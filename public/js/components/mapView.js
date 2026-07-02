@@ -56,9 +56,13 @@ export function initMapTooltip() {}
 function ensureMap(sites) {
   if (map) return map;
 
-  map = L.map("map", { attributionControl: true }).fitBounds(
+  // Default topleft zoom control would sit underneath the floating Network
+  // Status panel (docked to the full left edge) — bottomright stays clear
+  // of both floating panels in the dashboard shell (#3).
+  map = L.map("map", { attributionControl: true, zoomControl: false }).fitBounds(
     L.latLngBounds(sites.map((s) => [s.lat, s.lng])).pad(0.25)
   );
+  L.control.zoom({ position: "bottomright" }).addTo(map);
   L.tileLayer(OSM_TILE_URL, { attribution: OSM_ATTRIBUTION, maxZoom: 19 }).addTo(map);
   markerLayer = L.layerGroup().addTo(map);
   routeLayer = L.layerGroup().addTo(map);

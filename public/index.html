@@ -37,29 +37,28 @@
       Component hierarchy (mirrored 1:1 by public/js/components/*):
         AppShell
         ├── Nav                     (live counts pill)
-        ├── NetworkStatusPanel      → SiteCard × N
-        ├── MapPanel                → SiteMarker × N, RouteArc × active transfers
-        ├── SimulationControlsPanel
+        ├── MapStage                (full-bleed hero — map-heading is visually
+        │                            implicit; the map itself is the panel)
+        │   ├── MapPanel                → SiteMarker × N, RouteArc × active transfers
+        │   ├── NetworkStatusPanel      → SiteCard × N        (floats, left edge)
+        │   └── SimulationControlsPanel                       (floats, right third)
         ├── TransfersPanel          → TransferRow × N
         └── TransferDetailPanel
             ├── AgentConsole
             ├── ManagerReplyPanel
             └── RegionalOverridePanel
     -->
-    <main class="console-grid">
-      <section class="panel panel--network" aria-labelledby="network-heading">
+    <section class="map-stage" aria-label="Ops Map — Eastern Singapore">
+      <div class="map-frame" id="map-frame">
+        <div id="map" class="map" role="img" aria-label="Map of ClickShop sites across Eastern Singapore"></div>
+      </div>
+
+      <section class="panel floating-panel floating-panel--network" aria-labelledby="network-heading">
         <h2 class="eyebrow" id="network-heading">Network Status</h2>
         <div id="site-cards" class="site-cards"></div>
       </section>
 
-      <section class="panel panel--map" aria-labelledby="map-heading">
-        <h2 class="eyebrow" id="map-heading">Ops Map — Eastern Singapore</h2>
-        <div class="map-frame" id="map-frame">
-          <div id="map" class="map" role="img" aria-label="Map of ClickShop sites across Eastern Singapore"></div>
-        </div>
-      </section>
-
-      <section class="panel panel--sim" aria-labelledby="sim-heading">
+      <section class="panel floating-panel floating-panel--sim" aria-labelledby="sim-heading">
         <h2 class="eyebrow" id="sim-heading">Simulate Incident</h2>
         <div class="controls-row">
           <select id="sim-site" class="select" aria-label="Site"></select>
@@ -72,7 +71,9 @@
         </div>
         <p id="sim-result" class="hint"></p>
       </section>
+    </section>
 
+    <main class="console-grid">
       <section class="panel panel--transfers" aria-labelledby="transfers-heading">
         <h2 class="eyebrow" id="transfers-heading">Transfers</h2>
         <div id="transfer-list" class="transfer-list"></div>
