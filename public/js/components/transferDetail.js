@@ -1,8 +1,9 @@
 import { statusMeta } from "../format.js";
 import { renderAgentConsole } from "./agentConsole.js";
 
-export function showTransferDetailPanel(id) {
-  document.getElementById("transfer-detail").hidden = false;
+// The timeline strip is always visible (#3/#5) -- this just gives instant
+// feedback on click, before the async GET /transfers/:id resolves.
+export function markTransferSelected(id) {
   document.getElementById("detail-id").textContent = `#${id}`;
 }
 
@@ -12,5 +13,8 @@ export function renderTransferDetail(detail) {
   statusEl.textContent = meta.label;
   statusEl.className = `status-pill status-pill--${meta.tone}`;
 
-  renderAgentConsole(detail.agentSteps, detail.messages);
+  renderAgentConsole(detail.agentSteps, detail.messages, {
+    currentStatus: detail.transfer.status,
+    transferId: detail.transfer.id,
+  });
 }

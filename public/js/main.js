@@ -6,7 +6,7 @@ import { renderNetworkStatus, initSiteFilter } from "./components/networkStatus.
 import { renderMap, initMapTooltip } from "./components/mapView.js";
 import { populateSimSiteOptions, initSimulationControls } from "./components/simulationControls.js";
 import { renderTransferList } from "./components/transferList.js";
-import { showTransferDetailPanel, renderTransferDetail } from "./components/transferDetail.js";
+import { markTransferSelected, renderTransferDetail } from "./components/transferDetail.js";
 import { initConsoleCopy } from "./components/agentConsole.js";
 import { initManagerReply } from "./components/managerReply.js";
 import { populateOverrideDonorOptions, initRegionalOverride } from "./components/regionalOverride.js";
@@ -40,7 +40,7 @@ async function loadTransfers() {
 
 function selectTransfer(id) {
   state.selectedTransferId = id;
-  showTransferDetailPanel(id);
+  markTransferSelected(id);
   renderTransferList(state.transfers, { selectedTransferId: id, onSelect: selectTransfer });
   renderMap(state.sites, state.transfers, id, state.siteTypeFilter);
 

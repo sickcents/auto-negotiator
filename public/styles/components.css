@@ -61,25 +61,20 @@
 }
 
 /* ==========================================================================
-   Dashboard grid
+   Transfers strip — always-visible, sits above the map stage (#5)
    ========================================================================== */
 
-.console-grid {
+.transfers-strip {
   display: grid;
-  grid-template-columns: minmax(300px, 1fr) minmax(380px, 1.35fr);
-  grid-template-areas: "transfers detail";
-  align-items: start;
+  grid-template-columns: minmax(260px, 320px) 1fr;
   gap: var(--space-3);
   max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 var(--space-3) var(--space-6);
+  margin: var(--space-3) auto 0;
 }
 
-.panel--transfers {
-  grid-area: transfers;
-}
-.panel--detail {
-  grid-area: detail;
+.transfers-strip__list {
+  max-height: 480px;
+  overflow-y: auto;
 }
 
 .panel {
@@ -98,7 +93,7 @@
   position: relative;
   max-width: 1280px;
   height: 680px;
-  margin: var(--space-3) auto;
+  margin: var(--space-3) auto var(--space-6);
 }
 
 .map-stage .map-frame {
@@ -662,7 +657,8 @@
   color: var(--color-text-muted);
 }
 
-/* --- Agent Console — the other "media frame" surface -------------------- */
+/* --- Agent Timeline — the other "media frame" surface, grouped by
+       negotiation state instead of one flat scrolling log (#5) ----------- */
 
 .console-frame {
   background: var(--color-ink);
@@ -678,32 +674,61 @@
   margin-bottom: 4px;
 }
 
-.console {
+.agent-timeline {
   color: var(--color-text-on-ink);
   font-family: var(--font-mono);
   font-size: 12.5px;
   line-height: 1.55;
-  height: 260px;
+  max-height: 320px;
   overflow-y: auto;
   white-space: pre-wrap;
 }
 
-.console .line {
+.timeline-group {
+  margin-bottom: 12px;
+}
+.timeline-group:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-group__label {
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.timeline-group__label::-webkit-details-marker {
+  display: none;
+}
+.timeline-group__label::before {
+  content: "▸ ";
+  font-size: 9px;
+}
+.timeline-group[open] > .timeline-group__label::before {
+  content: "▾ ";
+}
+
+.timeline-group__events {
+  margin: 8px 0 0 6px;
+  padding-left: 14px;
+  border-left: 2px solid var(--color-border-on-ink);
+}
+
+.agent-timeline .line {
   margin-bottom: 10px;
 }
-.console .thought {
+.agent-timeline .thought {
   color: var(--color-text-on-ink-muted);
 }
-.console .tool {
+.agent-timeline .tool {
   color: var(--color-signal-light);
 }
-.console .message-agent {
+.agent-timeline .message-agent {
   color: #bfe3c9;
 }
-.console .message-manager {
+.agent-timeline .message-manager {
   color: #f3a897;
 }
-.console .message-regional_director {
+.agent-timeline .message-regional_director {
   color: #a9c2f0;
 }
 
@@ -712,11 +737,11 @@
    ========================================================================== */
 
 @media (max-width: 1023px) {
-  .console-grid {
+  .transfers-strip {
     grid-template-columns: 1fr;
-    grid-template-areas:
-      "transfers"
-      "detail";
+  }
+  .transfers-strip__list {
+    max-height: 240px;
   }
 
   /* Floating panels only work with room to spare either side of the map;
