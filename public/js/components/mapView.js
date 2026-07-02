@@ -14,7 +14,7 @@ let map = null;
 let markerLayer = null;
 let routeLayer = null;
 
-export function renderMap(sites, transfers = [], selectedTransferId = null) {
+export function renderMap(sites, transfers = [], selectedTransferId = null, activeSiteTypes = null) {
   if (sites.length === 0) return;
   ensureMap(sites);
 
@@ -41,7 +41,8 @@ export function renderMap(sites, transfers = [], selectedTransferId = null) {
       }).addTo(routeLayer);
     });
 
-  sites.forEach((site) => {
+  const visibleSites = activeSiteTypes ? sites.filter((s) => activeSiteTypes.has(s.siteType)) : sites;
+  visibleSites.forEach((site) => {
     L.marker([site.lat, site.lng], { icon: siteIcon(site) })
       .bindTooltip(siteTooltipHtml(site), { className: "map-tooltip", direction: "top", offset: [0, -10] })
       .addTo(markerLayer);

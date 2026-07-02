@@ -137,6 +137,54 @@
 }
 
 /* ==========================================================================
+   Network Status — Site Type filter
+   ========================================================================== */
+
+.site-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 var(--space-2);
+}
+
+.site-filter__btn {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border: none;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  opacity: 0.35;
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.site-filter__btn:hover {
+  transform: translateY(-1px);
+}
+
+.site-filter__btn.is-active {
+  opacity: 1;
+}
+
+.site-filter__btn.type-XL {
+  background: var(--color-site-xl);
+  color: var(--color-site-xl-strong);
+}
+.site-filter__btn.type-L {
+  background: var(--color-site-l);
+  color: var(--color-site-l-strong);
+}
+.site-filter__btn.type-M {
+  background: var(--color-site-m);
+  color: var(--color-site-m-strong);
+}
+.site-filter__btn.type-S {
+  background: var(--color-site-s);
+  color: var(--color-site-s-strong);
+}
+
+/* ==========================================================================
    Network Status — Site cards
    ========================================================================== */
 

@@ -2,7 +2,7 @@
 // public/js/components/*; each component only knows the DOM nodes it owns.
 
 import { api } from "./api.js";
-import { renderNetworkStatus } from "./components/networkStatus.js";
+import { renderNetworkStatus, initSiteFilter } from "./components/networkStatus.js";
 import { renderMap, initMapTooltip } from "./components/mapView.js";
 import { populateSimSiteOptions, initSimulationControls } from "./components/simulationControls.js";
 import { renderTransferList } from "./components/transferList.js";
@@ -17,13 +17,14 @@ const state = {
   transfers: [],
   selectedTransferId: null,
   pollTimer: null,
+  siteTypeFilter: new Set(["XL", "L", "M", "S"]),
 };
 
 async function loadSites() {
   const { sites } = await api("/sites");
   state.sites = sites;
-  renderNetworkStatus(state.sites);
-  renderMap(state.sites, state.transfers, state.selectedTransferId);
+  renderNetworkStatus(state.sites, state.siteTypeFilter);
+  renderMap(state.sites, state.transfers, state.selectedTransferId, state.siteTypeFilter);
   populateSimSiteOptions(state.sites);
   populateOverrideDonorOptions(state.sites);
   renderNavStatus(state.sites, state.transfers);
@@ -33,7 +34,7 @@ async function loadTransfers() {
   const { transfers } = await api("/transfers");
   state.transfers = transfers;
   renderTransferList(state.transfers, { selectedTransferId: state.selectedTransferId, onSelect: selectTransfer });
-  renderMap(state.sites, state.transfers, state.selectedTransferId);
+  renderMap(state.sites, state.transfers, state.selectedTransferId, state.siteTypeFilter);
   renderNavStatus(state.sites, state.transfers);
 }
 
@@ -41,7 +42,7 @@ function selectTransfer(id) {
   state.selectedTransferId = id;
   showTransferDetailPanel(id);
   renderTransferList(state.transfers, { selectedTransferId: id, onSelect: selectTransfer });
-  renderMap(state.sites, state.transfers, id);
+  renderMap(state.sites, state.transfers, id, state.siteTypeFilter);
 
   if (state.pollTimer) clearInterval(state.pollTimer);
   pollTransfer();
@@ -67,6 +68,13 @@ async function pollTransfer() {
 
 initMapTooltip();
 initConsoleCopy();
+initSiteFilter({
+  onChange: (activeTypes) => {
+    state.siteTypeFilter = activeTypes;
+    renderNetworkStatus(state.sites, state.siteTypeFilter);
+    renderMap(state.sites, state.transfers, state.selectedTransferId, state.siteTypeFilter);
+  },
+});
 initSimulationControls({
   onTriggered: async () => {
     await loadSites();
