@@ -1,4 +1,4 @@
-[1] Redesign Site Card visual language - PENDING
+[1] Redesign Site Card visual language - DONE
 [2] Migrate Ops Map to Leaflet + OpenStreetMap - PENDING
 [3] Dashboard shell overhaul: full-bleed map, sidebar, floating panel - PENDING
 [4] Filterable site sidebar (S/M/L/XL) - PENDING
