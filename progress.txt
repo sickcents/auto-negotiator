@@ -2,4 +2,4 @@
 [2] Migrate Ops Map to Leaflet + OpenStreetMap - DONE
 [3] Dashboard shell overhaul: full-bleed map, sidebar, floating panel - DONE
 [4] Filterable site sidebar (S/M/L/XL) - DONE
-[5] Transfers dashboard as a vertical step-timeline - PENDING
+[5] Transfers dashboard as a vertical step-timeline - DONE
