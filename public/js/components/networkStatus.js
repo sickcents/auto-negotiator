@@ -31,7 +31,7 @@ function siteCardHtml(site) {
   return `
     <div class="site-card type-${site.siteType}">
       <p class="site-card__eyebrow">
-        <span class="site-card__badge">[${site.siteType}]</span>
+        <span class="site-card__badge">${site.siteType}</span>
         ${site.mrtWaypoint} MRT
       </p>
       <h3 class="site-card__name">${site.name}</h3>

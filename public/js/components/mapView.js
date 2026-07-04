@@ -73,7 +73,7 @@ function ensureMap(sites) {
 function siteIcon(site) {
   return L.divIcon({
     className: "map-marker-icon",
-    html: `<span class="map-marker map-marker--${site.siteType}">[${site.siteType}]</span>`,
+    html: `<span class="map-marker map-marker--${site.siteType}">${site.siteType}</span>`,
     iconSize: MARKER_SIZE,
     iconAnchor: [MARKER_SIZE[0] / 2, MARKER_SIZE[1] / 2],
   });
