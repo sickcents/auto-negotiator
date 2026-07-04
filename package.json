@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "seed": "tsx --env-file=.env scripts/seed.ts"
+    "seed": "tsx --env-file=.env scripts/seed.ts",
+    "start": "vercel dev --listen 3000"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
