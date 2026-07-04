@@ -11,6 +11,8 @@ import {
   markEscalationSent,
   countManagerRepliesSinceFirstFirmness,
   recordFirmnessPushback,
+  claimTurn,
+  releaseTurn,
   type TransferRow,
 } from "./transferRepo.js";
 
@@ -20,6 +22,10 @@ export interface StepResult {
   toolName?: string;
   toolResult?: unknown;
   skipped?: boolean;
+  // Why nothing executed: "waiting_on_human" means stop polling until a
+  // human acts; "turn_in_flight" means another /step call is mid-turn right
+  // now, so the caller should poll again shortly to pick up its result.
+  skippedReason?: "waiting_on_human" | "turn_in_flight";
   error?: string;
 }
 
@@ -133,11 +139,39 @@ function isProgressToFulfillment(turn: AgentTurn): boolean {
 // frontend calls this repeatedly; it's meant to be cheap to call when
 // there's nothing to do (see WAITING_ON_HUMAN).
 export async function runAgentStep(transferId: number): Promise<StepResult> {
-  const transfer = await getTransfer(transferId);
-  if (!transfer) throw new Error(`No such Transfer: ${transferId}`);
+  const snapshot = await getTransfer(transferId);
+  if (!snapshot) throw new Error(`No such Transfer: ${transferId}`);
 
+  // Cheap read-only short-circuit first, so merely viewing a terminal
+  // Transfer never writes anything.
+  if (isWaitingOnHuman(snapshot)) {
+    return { status: snapshot.status, skipped: true, skippedReason: "waiting_on_human" };
+  }
+
+  // Per-transfer turn lock (#9): claim before doing any work. Losing the
+  // race means another call is mid-turn — report that, don't double-run.
+  const claim = await claimTurn(transferId);
+  if (!claim) {
+    return { status: snapshot.status, skipped: true, skippedReason: "turn_in_flight" };
+  }
+  const { claimToken } = claim;
+
+  try {
+    return await runClaimedTurn(claim.transfer);
+  } finally {
+    await releaseTurn(transferId, claimToken);
+  }
+}
+
+// The actual turn body — only ever entered holding the turn lock, with the
+// post-claim row (not the pre-claim snapshot) as its view of the Transfer.
+async function runClaimedTurn(transfer: TransferRow): Promise<StepResult> {
+  const transferId = transfer.id;
+
+  // Re-check on the claimed row: the status may have gone terminal between
+  // the snapshot read and winning the claim.
   if (isWaitingOnHuman(transfer)) {
-    return { status: transfer.status, skipped: true };
+    return { status: transfer.status, skipped: true, skippedReason: "waiting_on_human" };
   }
 
   const [receiverSite, donorSite, messages, priorSteps] = await Promise.all([
