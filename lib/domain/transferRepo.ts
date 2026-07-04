@@ -63,6 +63,43 @@ export async function listTransfers(): Promise<TransferRow[]> {
   return rows.map(rowToTransfer);
 }
 
+// Per-transfer turn lock (#9): only one /step turn may execute at a time
+// for a given Transfer. The claim is a single conditional UPDATE, so two
+// overlapping /step calls race at the database, not in JS — exactly one
+// gets the row back; the loser sees null and must not run a turn. A lock
+// older than `staleAfterSeconds` is treated as abandoned (a crashed
+// serverless invocation can never release) and may be re-claimed.
+//
+// Returns the claimed row (post-claim state, so callers decide off fresh
+// data, not a pre-claim snapshot) plus the claim timestamp, which acts as
+// a token: release only clears the lock if it still holds *our* claim, so
+// a slow turn whose stale lock was legitimately stolen can't wipe out the
+// thief's lock on its way out.
+export async function claimTurn(
+  id: number,
+  staleAfterSeconds = 60
+): Promise<{ transfer: TransferRow; claimToken: string } | null> {
+  // The token round-trips as Postgres text (not a driver-parsed Date):
+  // JS Date only keeps milliseconds while now() stores microseconds, so a
+  // parsed value would never compare equal again on release.
+  const rows = await sql(
+    `UPDATE transfers SET turn_started_at = now()
+     WHERE id = $1
+       AND (turn_started_at IS NULL OR turn_started_at < now() - make_interval(secs => $2))
+     RETURNING *, turn_started_at::text AS claim_token`,
+    [id, staleAfterSeconds]
+  );
+  if (!rows[0]) return null;
+  return { transfer: rowToTransfer(rows[0]), claimToken: rows[0].claim_token };
+}
+
+export async function releaseTurn(id: number, claimToken: string): Promise<void> {
+  await sql(
+    "UPDATE transfers SET turn_started_at = NULL WHERE id = $1 AND turn_started_at = $2::timestamptz",
+    [id, claimToken]
+  );
+}
+
 export async function setTransferStatus(id: number, status: TransferStatus): Promise<void> {
   await sql("UPDATE transfers SET status = $1, updated_at = now() WHERE id = $2", [status, id]);
 }
