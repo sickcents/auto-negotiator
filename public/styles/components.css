@@ -692,6 +692,9 @@
 }
 
 .timeline-group__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   cursor: pointer;
   list-style: none;
   user-select: none;
@@ -699,12 +702,13 @@
 .timeline-group__label::-webkit-details-marker {
   display: none;
 }
-.timeline-group__label::before {
-  content: "▸ ";
-  font-size: 9px;
+.timeline-group__caret {
+  width: 0.7em;
+  height: 0.7em;
+  transition: transform 0.15s ease;
 }
-.timeline-group[open] > .timeline-group__label::before {
-  content: "▾ ";
+.timeline-group[open] > .timeline-group__label .timeline-group__caret {
+  transform: rotate(90deg);
 }
 
 .timeline-group__events {
