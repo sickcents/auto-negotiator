@@ -4,6 +4,7 @@
 // happened in, and keeps a plain-text mirror for the Copy button.
 
 import { STATUS_META, statusMeta } from "../format.js";
+import { icon } from "../icons.js";
 
 const STATUS_ORDER = Object.keys(STATUS_META);
 
@@ -129,7 +130,7 @@ function groupHtml(status, events) {
   const meta = statusMeta(status);
   const open = openGroups.has(status) ? "open" : "";
   return `<details class="timeline-group" data-status="${status}" ${open}>
-    <summary class="timeline-group__label status-pill status-pill--${meta.tone}">${meta.label}</summary>
+    <summary class="timeline-group__label status-pill status-pill--${meta.tone}">${icon("caret-right", "timeline-group__caret")}${meta.label}</summary>
     <div class="timeline-group__events">${events.map(eventHtml).join("")}</div>
   </details>`;
 }

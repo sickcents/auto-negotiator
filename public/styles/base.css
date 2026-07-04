@@ -70,6 +70,14 @@ input {
   font-size: 0.85rem;
 }
 
+/* Phosphor icons — self-hosted inline SVGs, see public/js/icons.js */
+.ph-icon {
+  width: 1em;
+  height: 1em;
+  flex: none;
+  fill: currentColor;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
