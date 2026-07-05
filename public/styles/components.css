@@ -300,13 +300,27 @@
   user-select: none;
 }
 
+/* Non-scrolling wrapper for the header + its scroll region (#34 follow-up):
+   this used to be the scroll container itself, with the sticky header as
+   its first child — meaning the scrollbar spanned the container's full
+   height, including the header's own row, and visibly ran behind/through
+   it (the same bug #30 found and fixed for Network Status). Splitting the
+   header out into a static element and moving overflow-y onto
+   .transfers-strip__list-body fixes it the same way. */
 .transfers-strip__list {
   flex: 0 1 auto;
   max-height: 40%;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   /* Persistent divider (#14) — a static border on the box itself, not the
      scrolled content, so it stays put no matter how either region scrolls. */
   border-bottom: 1px solid var(--color-border);
+}
+
+.transfers-strip__list-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
   padding-bottom: var(--space-2);
   /* Gutter (#25) — rows had no right-side padding of their own, so they ran
      flush against the scrollbar thumb. */
@@ -329,24 +343,24 @@
    itself by #30 once the header was split out of the scroll region) so the
    Network Status scroll region matches instead of falling back to the OS
    default. */
-.transfers-strip__list,
+.transfers-strip__list-body,
 .transfers-strip__timeline,
 .floating-panel--network__body {
   scrollbar-width: thin;
   scrollbar-color: rgba(20, 20, 19, 0.22) transparent;
 }
-.transfers-strip__list::-webkit-scrollbar,
+.transfers-strip__list-body::-webkit-scrollbar,
 .transfers-strip__timeline::-webkit-scrollbar,
 .floating-panel--network__body::-webkit-scrollbar {
   width: 6px;
 }
-.transfers-strip__list::-webkit-scrollbar-thumb,
+.transfers-strip__list-body::-webkit-scrollbar-thumb,
 .transfers-strip__timeline::-webkit-scrollbar-thumb,
 .floating-panel--network__body::-webkit-scrollbar-thumb {
   background: rgba(20, 20, 19, 0.22);
   border-radius: var(--radius-pill);
 }
-.transfers-strip__list::-webkit-scrollbar-track,
+.transfers-strip__list-body::-webkit-scrollbar-track,
 .transfers-strip__timeline::-webkit-scrollbar-track,
 .floating-panel--network__body::-webkit-scrollbar-track {
   background: transparent;
