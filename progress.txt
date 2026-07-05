@@ -22,3 +22,4 @@
 [22] Agent Timeline: use 8px border-radius instead of stadium radius - DONE
 [23] Sticky headers on each scrollable panel - DONE
 [24] Shop icons on the map should follow the design system's colors - DONE
+[25] Network Status: standard scrollbar + breathing room - DONE
