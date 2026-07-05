@@ -30,3 +30,4 @@
 [30] Network Status: header must sit outside the panel's scroll container - DONE
 [31] Transfers panel: resize handle needs a visible at-rest affordance - DONE
 [32] Align Transfers-list & Simulate Incident header padding with Network Status - DONE
+[33] Ticket (Transfer Detail): unify divergent header styles into one consistent look - DONE
