@@ -207,6 +207,17 @@ function onHumanInput() {
 initManagerReply({ getSelectedTransferId: () => state.selectedTransferId, onSent: onHumanInput });
 initRegionalOverride({ getSelectedTransferId: () => state.selectedTransferId, onResolved: onHumanInput });
 
+// Site stock/gauges only used to refresh on specific triggers (load,
+// Simulate Incident, a dispatch_courier step for the selected Transfer) —
+// not on this periodic cadence. But a Transfer's simulated arrival (#43) can
+// complete and move stock in the background for a Transfer that isn't even
+// selected, so both loads share this periodic refresh instead of just
+// loadTransfers (#44) — same existing interval, no new poll loop.
+async function periodicRefresh() {
+  await loadSites();
+  await loadTransfers();
+}
+
 loadSites();
 loadTransfers();
-setInterval(loadTransfers, 4000);
+setInterval(periodicRefresh, 4000);
