@@ -120,11 +120,21 @@
   width: var(--transfers-strip-width-expanded);
 }
 
+/* Sticky panel heading (#23) — .transfers-strip__list has no padding of
+   its own (it lives on the grandparent .panel), so the header row already
+   spans the scroll container's full content width with nothing to cancel. */
 .transfers-strip__list-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
+  padding-bottom: 4px;
+  background: var(--color-glass);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
 }
 
 .pane-expand-toggle {
@@ -211,14 +221,34 @@
   pointer-events: none;
 }
 
+/* Padding moves off the scroll container onto its children (#23): sticky
+   `top: 0` on a descendant anchors to the *padding edge* of the nearest
+   scrolling ancestor, so as long as .floating-panel--network itself (the
+   scroll container) carried .panel's padding, the sticky heading could
+   only ever reach that padding edge — 24px short of the panel's true top —
+   no matter what margin trick was applied to the heading itself. Zeroing
+   the container's padding and restoring it on .network-status__heading /
+   .site-filter / .site-cards individually lets the heading reach the real
+   edge and stick flush, background included. */
 .floating-panel--network {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  padding: 0;
 }
 
 .floating-panel--sim {
   flex: 0 0 auto;
+}
+
+.network-status__heading {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: var(--space-3) var(--space-3) var(--space-1);
+  background: var(--color-glass);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
 }
 
 /* ==========================================================================
@@ -230,6 +260,7 @@
   flex-wrap: wrap;
   gap: 6px;
   margin: 0 0 var(--space-2);
+  padding: 0 var(--space-3); /* replaces the side inset .floating-panel--network used to provide (#23) */
 }
 
 .site-filter__btn {
@@ -283,6 +314,9 @@
    cell — one column reads far better than two cramped ones. */
 .floating-panel--network .site-cards {
   grid-template-columns: 1fr;
+  /* Replaces the side/bottom inset .floating-panel--network used to provide
+     before its padding moved onto children for the sticky heading (#23). */
+  padding: 0 var(--space-3) var(--space-3);
 }
 
 .site-card {
@@ -955,11 +989,23 @@
   box-shadow: var(--shadow-2);
 }
 
+/* Sticky panel heading (#23) — pulled out to .console-frame's true edges via
+   negative margin (canceling the frame's own padding) then padded back in
+   by the same amounts, so the sticky bar's ink background fully spans the
+   frame width instead of leaving the frame's own padding as transparent
+   gutters content could show through. Matching top corner radius so it
+   still reads as part of the frame once stuck, not a separate rectangle. */
 .console-frame__header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin: calc(-1 * var(--space-2)) calc(-1 * var(--space-3)) 0;
+  padding: var(--space-2) var(--space-3) 4px;
+  background: var(--color-ink);
+  border-radius: var(--radius-frame) var(--radius-frame) 0 0;
 }
 
 .agent-timeline {
