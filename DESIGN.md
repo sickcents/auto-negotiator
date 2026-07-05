@@ -439,7 +439,15 @@ Clicking a Network Status site card highlights that site's marker on the map, us
 
 The header's rendered height is published into `--nav-height` (`public/js/components/nav.js`, via `ResizeObserver` on the header element with `{ box: "border-box" }` — the default content-box wouldn't fire for a padding/border-only height change) instead of the panels below guessing with a hardcoded offset. `.transfers-strip` and `.side-rail` both read `top: calc(var(--nav-height) + var(--space-3))`, so they clear the header correctly no matter how tall it renders — including if it ever wraps to two lines. `--nav-height` defaults to `64px` in `tokens.css` for the instant before the first measurement lands. Below the `1023px` breakpoint the header (and both panels) switch to static/flow layout, so this mechanism only matters at desktop widths.
 
-## 15. App-Specific: Ops Map Tonal Filter (#15)
+## 15. App-Specific: Sticky Scroll-Container Headers (#23)
+
+**Standard pattern**: every scrollable panel's heading is `position: sticky; top: 0` with an opaque-enough background, so it stays visible while the panel's content scrolls beneath it. Applied to all three scrollable panels — the transfer list heading (`.transfers-strip__list-header`), the Agent Timeline heading (`.console-frame__header`), and the Network Status heading (`.network-status__heading`).
+
+**The gotcha this pattern has to account for**: sticky's `top: 0` anchors to the *padding edge* of the nearest scrolling ancestor, not its border edge. If the scroll container itself carries padding (as `.floating-panel--network` did, via the shared `.panel` class, since it's both the frosted panel *and* the scroll container in one element), the sticky heading can only ever reach that padding edge — no margin trick on the heading itself moves that anchor point. The fix used here: move the padding off the scroll container and onto its children instead (`.network-status__heading`, `.site-filter`, `.floating-panel--network .site-cards` each carry their own inset now; `.floating-panel--network` itself is `padding: 0`). Where the scroll container has no padding of its own to begin with (`.transfers-strip__list`, `.transfers-strip__timeline`), this doesn't come up — the heading reaches the true edge for free.
+
+A related wrinkle for headers with their own visual frame (`.console-frame__header` inside the ink `.console-frame`): the frame's *own* padding and rounded top corners aren't the scroll container's problem (the frame isn't what's scrolling), but the sticky header still needs to visually fill that frame's full width once stuck. That's a negative-margin-then-repad trick (`margin: calc(-1 * var(--space-2)) calc(-1 * var(--space-3)) 0; padding: var(--space-2) var(--space-3) 4px;`) plus matching top corner radius (`border-radius: var(--radius-frame) var(--radius-frame) 0 0`) so it reads as part of the frame rather than a separate rectangle once pinned.
+
+## 16. App-Specific: Ops Map Tonal Filter (#15)
 
 The Ops Map recolors OSM's fully-saturated tiles to a monotone plate by filtering only the Leaflet tile pane (`.map--ink .leaflet-tile-pane`); markers, route lines, tooltips, and the zoom control live in sibling panes and keep their own color. The recipe is seven named tokens in `public/styles/tokens.css`, composed in one `filter` rule in `components.css`:
 
