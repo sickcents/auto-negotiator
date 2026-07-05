@@ -299,6 +299,8 @@ function dispatchCard(args, result) {
     ["Distance", r.distanceKm != null ? `${r.distanceKm} km` : ""],
     ["ETA", r.etaMinutes != null ? `${r.etaMinutes} min` : ""],
     ["Confirmation", r.confirmationId],
+    ["Dispatched", formatTime(r.dispatchedAt)],
+    ["Est. arrival", formatTime(r.estimatedArrivalAt)],
   ]);
   return card("truck", "Courier dispatched", body, "tool-card--dispatch");
 }
@@ -419,6 +421,11 @@ function formatKm(v) {
   // distanceKm arrives as a raw haversine float — full precision bloats the
   // donor table's Distance column right off the card.
   return v == null ? "—" : `${Number(v).toFixed(1)} km`;
+}
+
+function formatTime(iso) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
 function pretty(value) {

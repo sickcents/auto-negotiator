@@ -32,3 +32,4 @@
 [32] Align Transfers-list & Simulate Incident header padding with Network Status - DONE
 [33] Ticket (Transfer Detail): unify divergent header styles into one consistent look - DONE
 [34] Panel headers: color/border-radius mismatch with panel body - DONE (follow-ups: bled Simulate Incident & Transfers headers flush to the panel edge; split Transfers header out of its scroll container so the scrollbar no longer runs behind it, per live design feedback)
+[38] Persist dispatch time and jittered arrival ETA on Transfer - DONE

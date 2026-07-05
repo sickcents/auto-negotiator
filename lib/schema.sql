@@ -47,12 +47,18 @@ CREATE TABLE IF NOT EXISTS transfers (
   pushback_count    INT NOT NULL DEFAULT 0,             -- Escalation Protocol round cap (Q10)
   escalation_sent   BOOLEAN NOT NULL DEFAULT FALSE,      -- has the deadlock summary email gone out yet?
   turn_started_at   TIMESTAMPTZ,                         -- per-transfer turn lock: non-null while a /step turn executes (#9)
+  dispatched_at        TIMESTAMPTZ,                      -- set once by dispatch_courier (#38)
+  estimated_arrival_at TIMESTAMPTZ,                       -- dispatch ETA + a one-time ±3min jitter, fixed at dispatch (#38)
   created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at        TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- Idempotent upgrade for databases created before the turn lock column existed.
 ALTER TABLE transfers ADD COLUMN IF NOT EXISTS turn_started_at TIMESTAMPTZ;
+
+-- Idempotent upgrade for databases created before dispatch timing existed (#38).
+ALTER TABLE transfers ADD COLUMN IF NOT EXISTS dispatched_at TIMESTAMPTZ;
+ALTER TABLE transfers ADD COLUMN IF NOT EXISTS estimated_arrival_at TIMESTAMPTZ;
 
 -- Every email/Manager Reply across every attempted donor, appended to the
 -- one Transfer it belongs to (CONTEXT.md: Transfer message history).
