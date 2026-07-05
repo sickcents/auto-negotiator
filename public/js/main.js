@@ -153,7 +153,11 @@ async function pollTransfer() {
   }
 
   await refreshDetail(id);
-  await loadSites(); // stock may have changed (dispatch_courier)
+  // Stock no longer moves at dispatch_courier itself (#43) — it moves lazily
+  // once a Transfer's simulated arrival passes, discovered on the next read.
+  // Any turn's GET /sites can surface that for an *earlier* dispatch, so
+  // refresh unconditionally rather than gating on this turn's toolName.
+  await loadSites();
   await loadTransfers();
 
   return WAITING_ON_HUMAN_STATUSES.has(result.status);

@@ -67,6 +67,23 @@ export async function listTransfers(): Promise<TransferRow[]> {
   return rows.map(rowToTransfer);
 }
 
+// Lazy arrival check (#43, ADR-0002 pattern — no cron/background process):
+// atomically claims every in_transit Transfer whose simulated arrival has
+// passed by flipping it straight to completed in one conditional UPDATE, the
+// same claim-then-act shape as claimTurn above. The WHERE clause means two
+// concurrent callers (e.g. GET /transfers and GET /sites racing) can never
+// both claim the same row, so the caller's post-claim stock move can never
+// run twice for one Transfer.
+export async function claimArrivedTransfers(): Promise<TransferRow[]> {
+  const rows = await sql(
+    `UPDATE transfers
+     SET status = 'completed', updated_at = now()
+     WHERE status = 'in_transit' AND estimated_arrival_at <= now()
+     RETURNING *`
+  );
+  return rows.map(rowToTransfer);
+}
+
 // Per-transfer turn lock (#9): only one /step turn may execute at a time
 // for a given Transfer. The claim is a single conditional UPDATE, so two
 // overlapping /step calls race at the database, not in JS — exactly one

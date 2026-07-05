@@ -59,7 +59,12 @@ export async function resolveOverride(
   })) as { distanceKm?: number };
   await pushZplConfigTool.execute({ toSiteId: transfer.receiverSiteId, hardwareType: transfer.hardwareType });
   await closeTicketTool.execute({ transferId });
-  await setTransferStatus(transferId, "completed");
+  // Same as the agent-driven flow (#43): dispatch only starts the transit
+  // window. Stock moves and the status flips to completed once
+  // estimated_arrival_at actually elapses (the lazy arrival check on the
+  // next read), not instantly here — a human override skips negotiation,
+  // not the simulated transit time.
+  await setTransferStatus(transferId, "in_transit");
 
-  return { status: "completed", distanceKm: dispatchResult.distanceKm, topRankedAlternativeKm };
+  return { status: "in_transit", distanceKm: dispatchResult.distanceKm, topRankedAlternativeKm };
 }

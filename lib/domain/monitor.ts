@@ -1,8 +1,21 @@
-import { getSite, getTrailingDepletion } from "./siteRepo.js";
+import { getSite, getTrailingDepletion, adjustStock } from "./siteRepo.js";
 import { computeMinBuffer, computeDepletionRate } from "./thresholds.js";
 import { SITE_TYPE_CONFIG, type HardwareType } from "./sites.js";
-import { createTransfer, type TransferRow } from "./transferRepo.js";
+import { createTransfer, claimArrivedTransfers, type TransferRow } from "./transferRepo.js";
 import { sql } from "../db.js";
+
+// PRD Section 4/8 "The Trigger" / simulated transit — inline, synchronous
+// check (ADR-0002), not a standing loop. Called at the point of an existing
+// read (GET /transfers, GET /sites) so an in_transit Transfer's arrival is
+// discovered the next time anyone looks, without a background poller.
+export async function completeArrivedTransfers(): Promise<void> {
+  const arrived = await claimArrivedTransfers();
+  for (const transfer of arrived) {
+    if (!transfer.donorSiteId) continue; // can't happen for in_transit, but guards against bad state
+    await adjustStock(transfer.donorSiteId, transfer.hardwareType, -transfer.quantity);
+    await adjustStock(transfer.receiverSiteId, transfer.hardwareType, transfer.quantity);
+  }
+}
 
 // PRD Section 4 "The Trigger" — inline, synchronous check (ADR-0002), not a
 // standing loop. Called at the point of mutation (Simulate Incident).
