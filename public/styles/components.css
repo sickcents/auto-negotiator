@@ -516,13 +516,21 @@
   color: var(--color-text-muted);
 }
 
+/* Fixed footprint (#39) -- a set width + centered text instead of
+   label-driven horizontal padding, so XL/L/M/S read as "the same shape,
+   different label" rather than XL visibly outsizing S. Width comes from
+   "XL" (the widest label) at this font-size/weight, plus a hair of
+   breathing room; the map marker (mapView.js's MARKER_SIZE) is already
+   fixed-size on its own and untouched by this. */
 .site-card__badge {
   display: inline-block;
   flex: none;
+  width: 24px;
+  text-align: center;
   font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 700;
-  padding: 1px 7px;
+  padding: 1px 0;
   border-radius: var(--radius-pill);
 }
 .site-card.type-XL .site-card__badge {
