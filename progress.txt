@@ -21,4 +21,4 @@
 [21] Header should span full page width with correct spacing above the panel below - DONE
 [22] Agent Timeline: use 8px border-radius instead of stadium radius - DONE
 [23] Sticky headers on each scrollable panel - DONE
-[24] Shop icons on the map should follow the design system's colors - PENDING
+[24] Shop icons on the map should follow the design system's colors - DONE
