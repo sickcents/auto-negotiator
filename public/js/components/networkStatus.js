@@ -82,8 +82,8 @@ function statRowHtml(label, current, threshold, buffer, isLow) {
       ></span>
     </div>
     <div class="site-card__stat-legend">
-      <span>Op. Threshold <b>${threshold}</b></span>
-      <span>Min Buffer <b>${buffer}</b></span>
+      <span class="site-card__stat-legend-item site-card__stat-legend-item--threshold">Op. Threshold <b>${threshold}</b></span>
+      <span class="site-card__stat-legend-item site-card__stat-legend-item--buffer">Min Buffer <b>${buffer}</b></span>
     </div>
   </div>`;
 }
