@@ -38,3 +38,4 @@
 [35] Transfer Detail: make it its own dismissable panel - DONE
 [36] Show a Site's current inventory levels in Simulate Incident - DONE
 [37] Show event timestamps in the Agent Timeline - DONE
+[39] Fixed-width Site Type badges in Network Status and the map - DONE
