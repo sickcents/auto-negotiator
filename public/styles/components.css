@@ -1059,6 +1059,36 @@
   min-width: 200px;
 }
 
+/* Joins Hardware Type + drop-to-quantity into one compound control (#40) --
+   Site stays its own separate .select in the row above/beside this. Shared
+   border comes from collapsing the touching edge (round only the group's
+   outer corners, drop the second item's left border) rather than each
+   .select/.input keeping its own full independent border. */
+.input-group {
+  display: flex;
+}
+.input-group > .select,
+.input-group > .input {
+  border-radius: 0;
+}
+.input-group > :first-child {
+  border-top-left-radius: var(--radius-button);
+  border-bottom-left-radius: var(--radius-button);
+}
+.input-group > :last-child {
+  border-top-right-radius: var(--radius-button);
+  border-bottom-right-radius: var(--radius-button);
+  border-left: none;
+}
+
+/* Anchors Trigger shortage to the panel's bottom-right (#40) instead of
+   sitting inline with the selectors. */
+.sim-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-2);
+}
+
 /* ==========================================================================
    Buttons
    ========================================================================== */
