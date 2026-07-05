@@ -142,6 +142,20 @@
   padding-right: 0;
 }
 
+/* For a --flush header that is *also* the first child of its .panel-padded
+   ancestor (Transfers list, Simulate Incident) — not just horizontal inset
+   but the ancestor's top padding is redundant with the header's own too,
+   stacking to double the gap above the header text (#32). Network Status's
+   header doesn't hit this: its ancestor panel carries no padding of its own
+   (#23/#30), so the header's own top padding is the only contribution.
+   Transfer Detail's header doesn't use this either — it follows the
+   Transfers list within the same outer panel rather than sitting directly
+   against the panel's own top padding, so its own top padding is real,
+   non-redundant spacing, not a stacked duplicate. */
+.panel-header--flush-top {
+  padding-top: 0;
+}
+
 /* Transfer Detail's header shares its scroll container with the Agent
    Timeline console frame's own sticky header (#27) — two stickies at the
    same top:0 would fight over the same slot, with the later one covering
