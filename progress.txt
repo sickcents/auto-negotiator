@@ -36,3 +36,4 @@
 [43] Move stock adjustment from dispatch time to simulated arrival - DONE
 [44] Reflect arrived transfers live and clarify 'active transfer' meaning - DONE
 [35] Transfer Detail: make it its own dismissable panel - DONE
+[36] Show a Site's current inventory levels in Simulate Incident - DONE
