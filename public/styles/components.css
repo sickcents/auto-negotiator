@@ -552,14 +552,27 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  margin-top: 5px;
+  /* Breathing room off the gauge above (#28) — 5px read as touching the
+     tick marks; this puts real space between the two. */
+  margin-top: 12px;
   font-size: 10px;
   color: var(--color-text-muted);
 }
 .site-card__stat-legend b {
   font-family: var(--font-mono);
   font-weight: 600;
-  color: var(--color-text-charcoal);
+}
+
+/* Color-match the legend text to its gauge mark (#28) — same tokens as
+   .site-card__gauge-mark--threshold/--buffer, so the correspondence is
+   visible without hovering for the tooltip. */
+.site-card__stat-legend-item--threshold,
+.site-card__stat-legend-item--threshold b {
+  color: var(--color-link);
+}
+.site-card__stat-legend-item--buffer,
+.site-card__stat-legend-item--buffer b {
+  color: var(--color-signal-light);
 }
 
 .site-card__stat.is-low .site-card__stat-label,
@@ -569,6 +582,10 @@
 .site-card__stat.is-low .site-card__gauge-fill {
   background: var(--color-signal);
 }
+/* The is-low alert color (--color-signal, a saturated rust) and the Min
+   Buffer legend's --color-signal-light are both warm oranges but distinct
+   enough in value to stay legible together — is-low doesn't touch the
+   legend at all, so the two never compete on the same word. */
 
 /* ==========================================================================
    Ops Map (signature element) — full-bleed, fixed ink background layer (#12)
