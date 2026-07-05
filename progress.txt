@@ -41,3 +41,4 @@
 [39] Fixed-width Site Type badges in Network Status and the map - DONE
 [40] Simulate Incident panel: group hardware+quantity inputs, reposition trigger button - DONE
 [41] Remove left border from inbound reply documents in the timeline - DONE
+[42] Clarify when Concession Protocol can re-route to the next-best donor - DONE
