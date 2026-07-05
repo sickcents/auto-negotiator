@@ -34,3 +34,4 @@
 [34] Panel headers: color/border-radius mismatch with panel body - DONE (follow-ups: bled Simulate Incident & Transfers headers flush to the panel edge; split Transfers header out of its scroll container so the scrollbar no longer runs behind it, per live design feedback)
 [38] Persist dispatch time and jittered arrival ETA on Transfer - DONE
 [43] Move stock adjustment from dispatch time to simulated arrival - DONE
+[44] Reflect arrived transfers live and clarify 'active transfer' meaning - DONE
