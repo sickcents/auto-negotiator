@@ -379,7 +379,7 @@ Rules for anything added to this rail going forward:
 The rail's width is continuously resizable via a real grab handle, not a two-state toggle — issue #16 shipped a click-to-snap button first, but the right affordance for "let me pick my own width" is a drag handle, not a jump between two presets:
 
 - **`--transfers-strip-width`** (`clamp(340px, 27vw, 420px)`) — the default width until the user drags.
-- **`.transfers-strip__resize-handle`** — a 12px invisible hit-area docked to the panel's right edge (`right: -6px`), with a 2px grip line (`::after`) that only becomes visible on hover/focus/drag so it doesn't clutter the panel at rest.
+- **`.transfers-strip__resize-handle`** — a 12px invisible hit-area docked to the panel's right edge (`right: -6px`), with a 2px grip line (`::after`) that stays faintly visible at rest (`rgba(20, 20, 19, 0.1)`, #31) so the handle is discoverable without already knowing to hover the exact right-edge pixel range, then strengthens to `rgba(20, 20, 19, 0.22)` on hover/focus/drag.
 - Dragging sets an inline `pane.style.width` directly (pointer events on the handle, tracked via `window`-level `pointermove`/`pointerup` so the drag keeps working even if the cursor leaves the thin handle), clamped to `320px`–`min(680px, 50vw)`.
 - Arrow-key presses on the focused handle (`role="separator"`, `aria-orientation="vertical"`) step the width by 24px; Home/End jump to the min/max bounds — the drag isn't mouse-only.
 - The choice persists in `localStorage` (`an.transfersPaneWidth`, storing the resolved pixel width) and is re-applied on load.

@@ -191,8 +191,10 @@
 
 /* Continuous drag-to-resize handle (#26) — replaces the #16 two-state
    expand toggle. The element itself is a wide (12px) invisible hit area on
-   the panel's right edge; ::after draws the thin visible grip line that
-   only appears on hover/focus/drag so it doesn't clutter the panel. */
+   the panel's right edge; ::after draws the grip line, faintly visible at
+   rest so the handle is discoverable without already knowing to hover the
+   exact right-edge pixel range, and considerably stronger on hover/focus/
+   drag so the affordance still "lights up" on interaction (#31). */
 .transfers-strip__resize-handle {
   position: absolute;
   top: 0;
@@ -212,7 +214,7 @@
   width: 2px;
   transform: translateX(-50%);
   border-radius: var(--radius-pill);
-  background: transparent;
+  background: rgba(20, 20, 19, 0.1);
   transition: background 120ms ease;
 }
 .transfers-strip__resize-handle:hover::after,
