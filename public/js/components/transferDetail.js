@@ -1,10 +1,21 @@
-import { statusMeta } from "../format.js";
+import { statusMeta, transferSummary } from "../format.js";
 import { renderAgentConsole } from "./agentConsole.js";
+import { icon } from "../icons.js";
+
+// Caret replaces the standard .eyebrow dot (#29) — points down from the
+// transfer row above, reading as "this is that row, expanded" rather than a
+// generic section label. Injected once; the row's own text never changes.
+export function initDetailHeader() {
+  document.getElementById("detail-eyebrow").insertAdjacentHTML("afterbegin", icon("caret-down"));
+}
 
 // The timeline strip is always visible (#3/#5) -- this just gives instant
-// feedback on click, before the async GET /transfers/:id resolves.
-export function markTransferSelected(id) {
+// feedback on click, before the async GET /transfers/:id resolves. The
+// summary line reuses the exact same wording as the clicked row (#29) so
+// the detail header reads as that row's own content, just expanded.
+export function markTransferSelected(id, transfer) {
   document.getElementById("detail-id").textContent = `#${id}`;
+  document.getElementById("detail-summary").textContent = transferSummary(transfer);
 }
 
 export function renderTransferDetail(detail) {

@@ -489,6 +489,16 @@ The donor/receiver route-highlight override (#13) still works and is still visua
 
 Both role rules are declared after the Site Type rules in `components.css`, so on ties (a marker can carry both a type class and a role class at once) the role rule wins for whichever properties it sets — no `!important` needed.
 
+## 18. App-Specific: Transfer Detail as a Ticket Expansion (#29)
+
+Building on the shared `.panel-header` pattern (#27), the Transfer Detail header is designed to read as **the clicked transfer row, expanded** — not a disconnected panel that happens to appear below the list:
+
+- **No flex gap between the list and detail regions.** `.transfers-strip` used to `gap: var(--space-3)` between `.transfers-strip__list` and `.transfers-strip__timeline`, leaving a dead strip of background between them. That's now `gap: 0` — the visual separation comes entirely from `.transfers-strip__list`'s `border-bottom` (#14) plus the detail header's own padding, so the header reads as continuing directly off the divider instead of floating a fixed distance below it.
+- **Same wording, larger type.** `transferSummary()` (`public/js/format.js`) is the single source for a transfer's one-line description ("kembangan-court needs 2x printer from bedok-north-ave"); both the list row and the detail header call it, so the detail header is never a differently-phrased restatement of the same transfer.
+- **The eyebrow's dot becomes a caret.** `.detail-header__eyebrow` suppresses the standard `.eyebrow::before` dot (`content: none`) and `initDetailHeader()` (`transferDetail.js`) injects the `caret-down` icon in its place — pointing down from the row above, reinforcing "this expanded from there" instead of reading as a generic section label.
+- **Instant feedback, not just the ID.** `markTransferSelected(id, transfer)` sets both the eyebrow ID and the summary line synchronously from the already-loaded `state.transfers`, before the async `GET /transfers/:id` resolves — matching the existing "instant feedback on click" behavior the ID-only version already had (#3/#5).
+- **Still not sticky.** Per #27, Transfer Detail's header stays `.panel-header--static` — it shares its scroll container with the Agent Timeline console frame's own sticky header, and two stickies at the same `top: 0` would fight over the same slot.
+
 ### Known Gaps
 - The live page uses MarkForMC, a proprietary licensed typeface. Sofia Sans is the closest open-source substitute and is listed in Mastercard's own fallback stack.
 - Tablet breakpoint specifics (768–1023px) were inferred from desktop and mobile captures; intermediate layouts may vary per section.

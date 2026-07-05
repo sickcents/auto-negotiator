@@ -178,7 +178,10 @@
   width: var(--transfers-strip-width);
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  /* No gap (#29) — the list's border-bottom and the detail header's own
+     padding are what carry the seam now, so Transfer Detail reads as an
+     expansion continuing directly off the list, not a second card floating
+     below a dead strip of background. */
   overflow: hidden;
 }
 
@@ -1059,15 +1062,42 @@
    Transfer Detail
    ========================================================================== */
 
-/* Baseline (not center) alignment is the one deliberate difference from the
-   shared .panel-header default — the status pill reads better lined up with
-   the heading's text baseline than its vertical center. */
+/* Top-aligned (not center) is the one deliberate difference from the shared
+   .panel-header default — the two-line title block (eyebrow + summary)
+   would otherwise vertically center against the single-line status pill in
+   a lopsided way; flex-start keeps the pill level with the eyebrow line. */
 .detail-header {
-  align-items: baseline;
+  align-items: flex-start;
 }
-.detail-header h2 {
-  font-size: 20px;
+
+.detail-header__title {
+  min-width: 0; /* lets the summary line truncate instead of overflowing */
+}
+
+/* Reads as "this is the expanded row" (#29): the caret (injected by
+   transferDetail.js, replacing the standard .eyebrow dot) points down from
+   the transfer row above, and the ID text matches the row's own "#N" — the
+   same identity, just larger. */
+.detail-header__eyebrow {
   margin: 0;
+}
+.detail-header__eyebrow::before {
+  content: none;
+}
+.detail-header__eyebrow .ph-icon {
+  color: var(--color-text-muted);
+}
+
+/* The summary line reuses the exact wording from the transfer row that was
+   clicked (transferSummary() in format.js) — same words, larger type,
+   rather than a differently-phrased heading for the same transfer. */
+.detail-header__summary {
+  margin: 4px 0 0;
+  font-size: 16px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .detail-block {
