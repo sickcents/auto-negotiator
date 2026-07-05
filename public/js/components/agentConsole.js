@@ -416,7 +416,9 @@ function errorRow(message) {
 }
 
 function formatKm(v) {
-  return v == null ? "—" : `${v} km`;
+  // distanceKm arrives as a raw haversine float — full precision bloats the
+  // donor table's Distance column right off the card.
+  return v == null ? "—" : `${Number(v).toFixed(1)} km`;
 }
 
 function pretty(value) {
