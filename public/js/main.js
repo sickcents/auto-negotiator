@@ -11,6 +11,9 @@ import { initConsoleCopy } from "./components/agentConsole.js";
 import { initManagerReply } from "./components/managerReply.js";
 import { populateOverrideDonorOptions, initRegionalOverride } from "./components/regionalOverride.js";
 import { renderNavStatus } from "./components/nav.js";
+import { showToast } from "./components/toast.js";
+import { icon } from "./icons.js";
+import { escapeHtml } from "./markdown.js";
 
 const state = {
   sites: [],
@@ -130,11 +133,31 @@ async function pollTransfer() {
     return result.skippedReason !== "turn_in_flight";
   }
 
+  if (result.toolName === "dispatch_courier" && !result.toolResult?.error) {
+    announceDispatch(id, result.toolResult);
+  }
+
   await refreshDetail(id);
   await loadSites(); // stock may have changed (dispatch_courier)
   await loadTransfers();
 
   return WAITING_ON_HUMAN_STATUSES.has(result.status);
+}
+
+// Explicit completion callout for the logistics step (#13): states what
+// moved and between which two sites, instead of leaving the operator to
+// notice the donor and receiver gauges changing simultaneously.
+function announceDispatch(transferId, toolResult) {
+  const transfer = state.transfers.find((t) => t.id === transferId);
+  if (!transfer) return;
+  const siteName = (id) => state.sites.find((s) => s.id === id)?.name ?? id;
+  const eta = toolResult?.etaMinutes != null ? ` · ETA ~${Number(toolResult.etaMinutes)} min` : "";
+  showToast(`
+    ${icon("truck", "toast__icon")}
+    <div class="toast__body">
+      <strong>${transfer.quantity} × ${escapeHtml(transfer.hardwareType)}${transfer.quantity > 1 ? "s" : ""} on the move</strong>
+      <span>${escapeHtml(siteName(transfer.donorSiteId))} → ${escapeHtml(siteName(transfer.receiverSiteId))}${eta}</span>
+    </div>`);
 }
 
 initMapTooltip();
