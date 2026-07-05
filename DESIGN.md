@@ -14,7 +14,7 @@ Typography is rendered entirely in **MarkForMC**, Mastercard's proprietary geome
 - Circular image portraits with attached white satellite-CTAs and traced-orange orbital paths
 - Ghost "watermark" headlines (cream-on-cream text at heading scale) layered behind circle portraits
 - Black primary CTAs with 20px radius in the body — the cookie-banner orange is kept to consent flows
-- Floating pill-shaped navigation that docks below the viewport top with rounded shoulders
+- Floating pill-shaped navigation that docks below the viewport top with rounded shoulders — **deviation on this app**: the header is a full-width bar flush at the top, not a floating pill; see the App-Specific Header Bar section (#21) for why
 - Eyebrow labels with a tiny accent dot + uppercase bold tracking — used as the section-category signal
 - Dark warm-black footer (`#141413`) with four-column link layout and large conversational headline
 
@@ -291,7 +291,7 @@ Mastercard uses shadows as **atmospheric cushioning**, not directional light. Th
 - Use weight 450 (not 400) for body paragraphs
 - Keep primary CTAs as Ink Black pills (20px radius) with cream text
 - Use Signal Orange only on consent, legal, or compliance actions
-- Float the nav as a rounded white pill below the viewport top, not flush at y=0
+- Float the nav as a rounded white pill below the viewport top, not flush at y=0 — **this app's header is the documented exception** (#21): a full-width bar flush at y=0, see the App-Specific Header Bar section
 - Build page rhythm from three surface tones: canvas cream → lifted cream → ink footer
 - Use thin Light Signal Orange arcs between service cards to imply connection
 
@@ -430,7 +430,15 @@ Clicking a Network Status site card highlights that site's marker on the map, us
 
 `.map-route--completed` is its own class rather than a `.map-route` modifier, since `.map-route` always carries the orbit-flow animation. The two are mutually exclusive per render (`renderMap` in `public/js/components/mapView.js`): a selected transfer is either in `ACTIVE_ROUTE_STATUSES` (animated treatment) or `completed` (static treatment), never both.
 
-## 14. App-Specific: Ops Map Tonal Filter (#15)
+## 14. App-Specific: Header Bar, Not a Floating Pill (#21)
+
+**This is a deliberate, documented deviation** from the floating pill-shaped nav pattern in Section 1 and Section 7 — called out there and here so it doesn't read as an inconsistency.
+
+`.nav-pill` spans the full viewport width and docks flush at the top (`top: 0; left: 0; right: 0`) with a bottom border instead of an all-around border + pill radius. Brand content stays left, the live status text moves to the right edge via `justify-content: space-between`. Below `599px` it stacks brand above status (`flex-direction: column`) rather than reverting to a squeezed pill.
+
+The header's rendered height is published into `--nav-height` (`public/js/components/nav.js`, via `ResizeObserver` on the header element with `{ box: "border-box" }` — the default content-box wouldn't fire for a padding/border-only height change) instead of the panels below guessing with a hardcoded offset. `.transfers-strip` and `.side-rail` both read `top: calc(var(--nav-height) + var(--space-3))`, so they clear the header correctly no matter how tall it renders — including if it ever wraps to two lines. `--nav-height` defaults to `64px` in `tokens.css` for the instant before the first measurement lands. Below the `1023px` breakpoint the header (and both panels) switch to static/flow layout, so this mechanism only matters at desktop widths.
+
+## 15. App-Specific: Ops Map Tonal Filter (#15)
 
 The Ops Map recolors OSM's fully-saturated tiles to a monotone plate by filtering only the Leaflet tile pane (`.map--ink .leaflet-tile-pane`); markers, route lines, tooltips, and the zoom control live in sibling panes and keep their own color. The recipe is seven named tokens in `public/styles/tokens.css`, composed in one `filter` rule in `components.css`:
 
