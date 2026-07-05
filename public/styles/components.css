@@ -96,6 +96,75 @@
 }
 
 /* ==========================================================================
+   Shared panel header (#27) — one pattern for every panel's heading row:
+   Transfers list, Transfer Detail, the Agent Timeline console frame,
+   Network Status, and Simulate Incident all use this instead of five
+   ad-hoc, copy-pasted variants. Eyebrow typography, sticky-to-panel-top
+   with a blurred background so scrolled content never shows through, and a
+   bottom-border separator so a header always reads as "the top of this
+   panel" rather than floating text. Documented in DESIGN.md.
+   ========================================================================== */
+.panel-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-3) var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-glass);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+}
+.panel-header.eyebrow {
+  /* .eyebrow's own bottom margin is for stand-alone labels; inside the
+     header row spacing is handled by .panel-header's padding instead. */
+  margin: 0;
+}
+
+/* Headers with a trailing action (the console frame's Copy button, the
+   detail header's status pill) push it to the far end; single-content
+   eyebrow headers must NOT get this — .eyebrow is itself a flex row (bullet
+   + label), and space-between on the same element shoves those two apart
+   instead of justifying the header's own children. */
+.panel-header--split {
+  justify-content: space-between;
+}
+
+/* Headers whose scroll container already sits inside an outer .panel's own
+   padding (Transfers list, Transfer Detail, Simulate Incident) don't need
+   their own horizontal inset — adding one would double it. Headers whose
+   container zeroes that padding onto its children instead (Network Status,
+   per #23) keep the default side padding above. */
+.panel-header--flush {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Transfer Detail's header shares its scroll container with the Agent
+   Timeline console frame's own sticky header (#27) — two stickies at the
+   same top:0 would fight over the same slot, with the later one covering
+   the former. Transfer Detail only adopts the shared typography/padding/
+   separator here; genuine sticky-ness for it is out of scope (a follow-up
+   issue redesigns this header to read as a ticket expansion instead). */
+.panel-header--static {
+  position: static;
+}
+
+/* Dark "on-ink" variant for headers inside ink-toned surfaces (the Agent
+   Timeline console frame) — same shape, inverted palette, top corners
+   matched to the frame it caps (#22), and a tighter bottom gap to keep the
+   console's dense, terminal-like feel. */
+.panel-header--on-ink {
+  padding-top: var(--space-2);
+  padding-bottom: 4px;
+  background: var(--color-ink);
+  border-bottom-color: var(--color-border-on-ink);
+  border-radius: var(--radius-frame) var(--radius-frame) 0 0;
+}
+
+/* ==========================================================================
    Transfers strip — the primary workspace, now a tall left rail (#12).
    List on top, live Agent Timeline + human-input controls below; each region
    scrolls inside the fixed-height rail so the panel itself never grows.
@@ -149,23 +218,6 @@
 }
 .transfers-strip--resizing {
   user-select: none;
-}
-
-/* Sticky panel heading (#23) — .transfers-strip__list has no padding of
-   its own (it lives on the grandparent .panel), so the header row already
-   spans the scroll container's full content width with nothing to cancel. */
-.transfers-strip__list-header {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  padding-bottom: 4px;
-  background: var(--color-glass);
-  -webkit-backdrop-filter: blur(14px) saturate(1.2);
-  backdrop-filter: blur(14px) saturate(1.2);
 }
 
 .transfers-strip__list {
@@ -243,7 +295,7 @@
    scroll container) carried .panel's padding, the sticky heading could
    only ever reach that padding edge — 24px short of the panel's true top —
    no matter what margin trick was applied to the heading itself. Zeroing
-   the container's padding and restoring it on .network-status__heading /
+   the container's padding and restoring it on the .panel-header /
    .site-filter / .site-cards individually lets the heading reach the real
    edge and stick flush, background included. */
 .floating-panel--network {
@@ -255,16 +307,6 @@
 
 .floating-panel--sim {
   flex: 0 0 auto;
-}
-
-.network-status__heading {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  padding: var(--space-3) var(--space-3) var(--space-1);
-  background: var(--color-glass);
-  -webkit-backdrop-filter: blur(14px) saturate(1.2);
-  backdrop-filter: blur(14px) saturate(1.2);
 }
 
 /* ==========================================================================
@@ -1000,15 +1042,15 @@
    Transfer Detail
    ========================================================================== */
 
+/* Baseline (not center) alignment is the one deliberate difference from the
+   shared .panel-header default — the status pill reads better lined up with
+   the heading's text baseline than its vertical center. */
 .detail-header {
-  display: flex;
   align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-2);
-  margin-bottom: var(--space-3);
 }
 .detail-header h2 {
   font-size: 20px;
+  margin: 0;
 }
 
 .detail-block {
@@ -1027,29 +1069,15 @@
        negotiation state instead of one flat scrolling log (#5) ----------- */
 
 .console-frame {
+  /* Replaces .detail-header's old margin-bottom, since the header is now a
+     .panel-header with no bottom margin of its own (#27). */
+  margin-top: var(--space-3);
   background: var(--color-ink);
   border-radius: var(--radius-frame); /* explicit exception (#22) — see tokens.css */
-  padding: var(--space-2) var(--space-3) var(--space-3);
+  /* Top/sides moved onto .panel-header--on-ink and #agent-timeline (#27),
+     matching the zero-padding-onto-children convention from #23. */
+  padding: 0 0 var(--space-3);
   box-shadow: var(--shadow-2);
-}
-
-/* Sticky panel heading (#23) — pulled out to .console-frame's true edges via
-   negative margin (canceling the frame's own padding) then padded back in
-   by the same amounts, so the sticky bar's ink background fully spans the
-   frame width instead of leaving the frame's own padding as transparent
-   gutters content could show through. Matching top corner radius so it
-   still reads as part of the frame once stuck, not a separate rectangle. */
-.console-frame__header {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: calc(-1 * var(--space-2)) calc(-1 * var(--space-3)) 0;
-  padding: var(--space-2) var(--space-3) 4px;
-  background: var(--color-ink);
-  border-radius: var(--radius-frame) var(--radius-frame) 0 0;
 }
 
 .agent-timeline {
@@ -1057,6 +1085,7 @@
   font-family: var(--font-mono);
   font-size: 12.5px;
   line-height: 1.55;
+  padding: 0 var(--space-3);
   /* No independent scroll region (#14) — this used to nest its own
      overflow-y:auto inside .transfers-strip__timeline, producing a
      scrollbar-inside-a-scrollbar. It now grows to full height and relies
