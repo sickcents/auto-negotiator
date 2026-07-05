@@ -110,12 +110,38 @@
   flex: 0 1 auto;
   max-height: 40%;
   overflow-y: auto;
+  /* Persistent divider (#14) — a static border on the box itself, not the
+     scrolled content, so it stays put no matter how either region scrolls. */
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-2);
 }
 
 .transfers-strip__timeline {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+}
+
+/* One scrollbar per logical region (#14): thin, ink-toned, cross-browser via
+   plain CSS (scrollbar-width/-color + the -webkit- pseudo-elements) rather
+   than a dependency — two properties cover every evergreen browser. */
+.transfers-strip__list,
+.transfers-strip__timeline {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(20, 20, 19, 0.22) transparent;
+}
+.transfers-strip__list::-webkit-scrollbar,
+.transfers-strip__timeline::-webkit-scrollbar {
+  width: 6px;
+}
+.transfers-strip__list::-webkit-scrollbar-thumb,
+.transfers-strip__timeline::-webkit-scrollbar-thumb {
+  background: rgba(20, 20, 19, 0.22);
+  border-radius: var(--radius-pill);
+}
+.transfers-strip__list::-webkit-scrollbar-track,
+.transfers-strip__timeline::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 /* ==========================================================================
@@ -804,11 +830,10 @@
   font-family: var(--font-mono);
   font-size: 12.5px;
   line-height: 1.55;
-  max-height: 320px;
-  overflow-y: auto;
-  /* Content is structured elements now (turn cards, email docs), not a flat
-     pre-wrapped log — normal white-space so template-literal indentation
-     between blocks doesn't render as stray gaps. */
+  /* No independent scroll region (#14) — this used to nest its own
+     overflow-y:auto inside .transfers-strip__timeline, producing a
+     scrollbar-inside-a-scrollbar. It now grows to full height and relies
+     on the parent as the single scroll container for this section. */
   white-space: normal;
 }
 

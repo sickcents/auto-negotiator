@@ -357,6 +357,19 @@ When refining existing screens generated with this design system:
 5. When in doubt, reach for one of three radii: 20px (buttons), 40px (hero/stadium), or 999px (pill/nav)
 6. Default backgrounds to Canvas Cream (`#F3F0EE`), not white — this single change shifts the entire mood toward Mastercard
 
+## 10. App-Specific: Left Pane Scroll Structure
+
+The left pane (`.transfers-strip` in `public/index.html`) is a fixed-height rail with exactly two stacked regions, each owning its own scroll:
+
+1. **`.transfers-strip__list`** — the transfer list, capped at 40% of the rail height (`max-height: 40%`).
+2. **`.transfers-strip__timeline`** — the detail/timeline region (header, Agent Timeline console, Manager Reply / Override controls), taking the remaining space (`flex: 1 1 auto; min-height: 0`).
+
+Rules for anything added to this rail going forward:
+
+- **One scroll container per region, never nested.** Content inside `.transfers-strip__timeline` (e.g. `#agent-timeline`) must not declare its own `overflow-y` / `max-height` — it grows naturally and relies on the parent region as the sole scroll container. A scrollbar nested inside a scrolling ancestor is treated as a bug (#14), not a valid pattern.
+- **The boundary between regions is a static border, not a gap.** `.transfers-strip__list` carries `border-bottom: 1px solid var(--color-border)`, matching the system-wide preference for border lines over shadows for functional delineation (Section 6). Because the border lives on the box itself rather than on scrolled content, it stays visible regardless of scroll position in either region.
+- **Scrollbars are plain CSS, no dependency.** `scrollbar-width/-color` (Firefox) plus `::-webkit-scrollbar*` (Chromium/Safari) give a thin, ink-toned (`rgba(20, 20, 19, 0.22)`) scrollbar affordance consistent across evergreen browsers. A scrollbar-styling library was considered and rejected — two CSS properties already cover the target browsers, so a dependency would add weight without adding capability.
+
 ### Known Gaps
 - The live page uses MarkForMC, a proprietary licensed typeface. Sofia Sans is the closest open-source substitute and is listed in Mastercard's own fallback stack.
 - Tablet breakpoint specifics (768–1023px) were inferred from desktop and mobile captures; intermediate layouts may vary per section.
