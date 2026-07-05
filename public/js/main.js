@@ -6,7 +6,7 @@ import { renderNetworkStatus, initSiteFilter, initSiteCardSelection } from "./co
 import { renderMap, initMapTooltip, panToSite } from "./components/mapView.js";
 import { populateSimSiteOptions, initSimulationControls } from "./components/simulationControls.js";
 import { renderTransferList } from "./components/transferList.js";
-import { markTransferSelected, renderTransferDetail, initDetailHeader } from "./components/transferDetail.js";
+import { markTransferSelected, renderTransferDetail, initDetailHeader, initDetailClose } from "./components/transferDetail.js";
 import { initConsoleCopy } from "./components/agentConsole.js";
 import { initManagerReply } from "./components/managerReply.js";
 import { initTransfersPaneResize } from "./components/transfersPane.js";
@@ -76,6 +76,16 @@ function selectTransfer(id) {
   } else {
     startPolling();
   }
+}
+
+// Dismissing the Transfer Detail panel (#35) drops the selection entirely —
+// closing it and re-selecting the same row should re-run the full
+// selectTransfer flow, not silently no-op against a stale selectedTransferId.
+function deselectTransfer() {
+  state.selectedTransferId = null;
+  stopPolling();
+  renderTransferList(state.transfers, { selectedTransferId: null, onSelect: selectTransfer });
+  renderMap(state.sites, state.transfers, null, state.siteTypeFilter, state.selectedSiteId);
 }
 
 async function refreshDetail(id) {
@@ -183,6 +193,7 @@ initMapTooltip();
 initNavHeightTracking();
 initConsoleCopy();
 initDetailHeader();
+initDetailClose(deselectTransfer);
 initTransfersPaneResize();
 initSiteFilter({
   onChange: (activeTypes) => {

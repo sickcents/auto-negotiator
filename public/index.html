@@ -62,7 +62,7 @@
       <p class="nav-pill__status" id="nav-status">Loading network…</p>
     </header>
 
-    <main class="panel transfers-strip" aria-label="Transfers">
+    <main class="transfers-strip" aria-label="Transfers">
       <div
         id="transfers-pane-resize-handle"
         class="transfers-strip__resize-handle"
@@ -71,20 +71,23 @@
         aria-label="Resize transfers panel"
         tabindex="0"
       ></div>
-      <div class="transfers-strip__list">
+      <section class="panel transfers-strip__list" aria-label="Transfers list">
         <h2 class="eyebrow panel-header panel-header--flush panel-header--bleed-top-left panel-header--static" id="transfers-heading">Transfers</h2>
         <div class="transfers-strip__list-body">
           <div id="transfer-list" class="transfer-list"></div>
         </div>
-      </div>
+      </section>
 
-      <div class="transfers-strip__timeline" id="transfer-detail">
+      <section class="panel floating-panel floating-panel--detail transfers-strip__timeline" id="transfer-detail" aria-label="Transfer detail" hidden>
         <div class="detail-header panel-header panel-header--flush panel-header--split panel-header--static">
           <div class="detail-header__title">
             <p class="eyebrow detail-header__eyebrow" id="detail-eyebrow">Transfer <span id="detail-id">—</span></p>
             <h2 id="detail-summary" class="detail-header__summary">Select a transfer above to see its details.</h2>
           </div>
-          <p id="detail-status" class="status-pill"></p>
+          <div class="detail-header__actions">
+            <p id="detail-status" class="status-pill"></p>
+            <button id="detail-close-btn" type="button" class="btn-icon" aria-label="Close transfer detail"></button>
+          </div>
         </div>
 
         <div class="console-frame">

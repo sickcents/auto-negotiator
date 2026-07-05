@@ -7,6 +7,17 @@ import { icon } from "../icons.js";
 // generic section label. Injected once; the row's own text never changes.
 export function initDetailHeader() {
   document.getElementById("detail-eyebrow").insertAdjacentHTML("afterbegin", icon("caret-down"));
+  document.getElementById("detail-close-btn").insertAdjacentHTML("afterbegin", icon("x"));
+}
+
+// Transfer Detail is now its own dismissable floating panel (#35), hidden
+// until a transfer is selected. onClose lets main.js clear selection state
+// (stop polling, drop the row/map highlight) in step with the panel hiding.
+export function initDetailClose(onClose) {
+  document.getElementById("detail-close-btn").addEventListener("click", () => {
+    document.getElementById("transfer-detail").hidden = true;
+    onClose();
+  });
 }
 
 // The timeline strip is always visible (#3/#5) -- this just gives instant
@@ -14,6 +25,7 @@ export function initDetailHeader() {
 // summary line reuses the exact same wording as the clicked row (#29) so
 // the detail header reads as that row's own content, just expanded.
 export function markTransferSelected(id, transfer) {
+  document.getElementById("transfer-detail").hidden = false;
   document.getElementById("detail-id").textContent = `#${id}`;
   document.getElementById("detail-summary").textContent = transferSummary(transfer);
 }
