@@ -13,6 +13,14 @@ export function renderTransferDetail(detail) {
   statusEl.textContent = meta.label;
   statusEl.className = `status-pill status-pill--${meta.tone}`;
 
+  // Manager Reply Injection and Regional Director Override are
+  // circumstance-only (#17): each is only actionable in the one status that
+  // put the agent in that spot (awaiting_reply / deadlock — see
+  // lib/domain/agentStep.ts, lib/domain/regionalOverride.ts), so they're
+  // hidden fixtures rather than always-on controls.
+  document.getElementById("manager-reply-block").hidden = detail.transfer.status !== "awaiting_reply";
+  document.getElementById("regional-override-block").hidden = detail.transfer.status !== "deadlock";
+
   renderAgentConsole(detail.agentSteps, detail.messages, {
     currentStatus: detail.transfer.status,
     transferId: detail.transfer.id,
