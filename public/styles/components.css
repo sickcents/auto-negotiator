@@ -1649,7 +1649,6 @@
 }
 .email-doc--inbound {
   background: var(--color-canvas);
-  border-left: 3px solid var(--color-link);
 }
 .email-doc__head {
   display: grid;
