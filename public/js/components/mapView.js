@@ -18,7 +18,7 @@ let markerLayer = null;
 let routeLayer = null;
 let courierAnimationFrame = null;
 
-export function renderMap(sites, transfers = [], selectedTransferId = null, activeSiteTypes = null) {
+export function renderMap(sites, transfers = [], selectedTransferId = null, activeSiteTypes = null, selectedSiteId = null) {
   if (sites.length === 0) return;
   ensureMap(sites);
 
@@ -69,10 +69,23 @@ export function renderMap(sites, transfers = [], selectedTransferId = null, acti
         : selected && site.id === selected.receiverSiteId
           ? "receiver"
           : null;
-    L.marker([site.lat, site.lng], { icon: siteIcon(site, role), zIndexOffset: role ? 1000 : 0 })
+    const isCardSelected = site.id === selectedSiteId;
+    L.marker([site.lat, site.lng], {
+      icon: siteIcon(site, role, isCardSelected),
+      zIndexOffset: role || isCardSelected ? 1000 : 0,
+    })
       .bindTooltip(siteTooltipHtml(site), { className: "map-tooltip", direction: "top", offset: [0, -10] })
       .addTo(markerLayer);
   });
+}
+
+// Pans (without changing zoom) to a card-selected site (#19). A one-shot
+// call from main.js on selection, not baked into every renderMap re-render
+// — otherwise every poll tick would recenter the map out from under a user
+// who has since panned elsewhere.
+export function panToSite(site) {
+  if (!map || !site) return;
+  map.panTo([site.lat, site.lng]);
 }
 
 // Direction + magnitude for the selected route (#13): a Phosphor courier
@@ -148,11 +161,15 @@ function ensureMap(sites) {
   return map;
 }
 
-function siteIcon(site, role = null) {
+function siteIcon(site, role = null, isCardSelected = false) {
   const roleClass = role ? ` map-marker--${role}` : "";
+  // Card selection is a separate outline ring (#19), independent of the
+  // donor/receiver role classes above, so both states can be visible on the
+  // same marker at once without one overwriting the other's treatment.
+  const selectedClass = isCardSelected ? " map-marker--card-selected" : "";
   return L.divIcon({
     className: "map-marker-icon",
-    html: `<span class="map-marker map-marker--${site.siteType}${roleClass}">${site.siteType}</span>`,
+    html: `<span class="map-marker map-marker--${site.siteType}${roleClass}${selectedClass}">${site.siteType}</span>`,
     iconSize: MARKER_SIZE,
     iconAnchor: [MARKER_SIZE[0] / 2, MARKER_SIZE[1] / 2],
   });

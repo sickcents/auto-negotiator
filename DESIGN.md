@@ -407,7 +407,17 @@ Both colors are existing tokens repurposed here, not new hex values — `--color
 
 Hover/focus on either mark shows a custom dark tooltip (ink background, chip radius, Level-1 shadow) instead of the native `title` attribute — `content: attr(aria-label)` in CSS, so the visible tooltip text and the accessible name are always the same string with nothing to keep in sync. Marks are `tabindex="0"` so the tooltip is keyboard-reachable, not just mouse-hover. Because the gauge now contains focusable descendants, its wrapper uses `role="group"` (not `role="img"`, which shouldn't contain interactive children) with the same summary `aria-label` it always had. The numeric legend below the bar (Op. Threshold / Min Buffer values) is unchanged — the tooltip adds a second way to get the exact number, it doesn't replace the legend.
 
-## 12. App-Specific: Ops Map Tonal Filter (#15)
+## 12. App-Specific: Site Card → Map Highlight (#19)
+
+Clicking a Network Status site card highlights that site's marker on the map, using a **Link Blue** treatment kept deliberately distinct from the donor/receiver **Signal Orange** route-selection treatment (Section 4) so the two selection states are never confused:
+
+- The card gets `.site-card--selected` (Link Blue border + soft ring `box-shadow`).
+- The marker gets `.map-marker--card-selected` — a Link Blue `outline` (not `box-shadow`, which the donor/receiver roles already use), so a site that's simultaneously a route endpoint and a card selection shows both rings independently rather than one clobbering the other.
+- The map pans (not rezooms) to the selected site once, on the click itself (`panToSite` in `public/js/components/mapView.js`) — not on every subsequent poll re-render, which would otherwise recenter the map out from under a user who has since panned elsewhere.
+- Clicking the already-selected card again toggles the selection off, clearing both highlights.
+- Selection state (`state.selectedSiteId` in `public/js/main.js`) is independent of the S/M/L/XL type filter and of the selected transfer — all three compose without interfering.
+
+## 13. App-Specific: Ops Map Tonal Filter (#15)
 
 The Ops Map recolors OSM's fully-saturated tiles to a monotone plate by filtering only the Leaflet tile pane (`.map--ink .leaflet-tile-pane`); markers, route lines, tooltips, and the zoom control live in sibling panes and keep their own color. The recipe is seven named tokens in `public/styles/tokens.css`, composed in one `filter` rule in `components.css`:
 
