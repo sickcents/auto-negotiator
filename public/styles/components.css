@@ -283,6 +283,15 @@
   border-radius: var(--radius-button);
   padding: 14px 16px;
   background: var(--color-surface);
+  cursor: pointer;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+/* Mirrors the map's Link Blue selection ring (#19) so the card and its
+   marker read as the same selection, not two unrelated highlight colors. */
+.site-card--selected {
+  border-color: var(--color-link);
+  box-shadow: 0 0 0 2px rgba(56, 96, 190, 0.25);
 }
 
 /* Eyebrow-style category line — Site Type + MRT is exactly the kind of
@@ -594,6 +603,16 @@
   box-shadow:
     0 0 0 3px rgba(207, 69, 0, 0.35),
     0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+/* Card -> map highlight (#19): a Link Blue outline ring, deliberately a
+   different color family and a different CSS property (outline, not
+   box-shadow) than the donor/receiver Signal Orange treatment above, so a
+   site that's both a card selection AND a route endpoint shows both rings
+   at once instead of one clobbering the other. */
+.map-marker--card-selected {
+  outline: 3px solid var(--color-link);
+  outline-offset: 3px;
 }
 
 /* Route annotations (#13): wrapper is a zero-size Leaflet div-icon; the

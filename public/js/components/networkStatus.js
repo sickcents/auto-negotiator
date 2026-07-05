@@ -1,10 +1,20 @@
 // NetworkStatusPanel — a SiteCard per store, grouped implicitly by the
 // XL/L/M/S value scale (badge color) rather than a separate legend.
 
-export function renderNetworkStatus(sites, activeSiteTypes = null) {
+export function renderNetworkStatus(sites, activeSiteTypes = null, selectedSiteId = null) {
   const container = document.getElementById("site-cards");
   const visible = activeSiteTypes ? sites.filter((s) => activeSiteTypes.has(s.siteType)) : sites;
-  container.innerHTML = visible.map(siteCardHtml).join("");
+  container.innerHTML = visible.map((site) => siteCardHtml(site, site.id === selectedSiteId)).join("");
+}
+
+// Card -> map highlight (#19): delegated on the container since cards are
+// fully re-rendered (innerHTML) on every poll tick, unlike the static
+// filter buttons — a per-card listener would be lost on the next render.
+export function initSiteCardSelection({ onSelect }) {
+  document.getElementById("site-cards").addEventListener("click", (event) => {
+    const card = event.target.closest(".site-card");
+    if (card) onSelect(card.dataset.siteId);
+  });
 }
 
 // Wired once — the filter toggles are static markup, not re-rendered per
@@ -25,11 +35,11 @@ function activeTypesFrom(buttons) {
   return new Set(buttons.filter((b) => b.classList.contains("is-active")).map((b) => b.dataset.siteType));
 }
 
-function siteCardHtml(site) {
+function siteCardHtml(site, isSelected = false) {
   const scannerLow = site.currentScanners < site.scannerMinBuffer;
   const printerLow = site.currentPrinters < site.printerMinBuffer;
   return `
-    <div class="site-card type-${site.siteType}">
+    <div class="site-card type-${site.siteType}${isSelected ? " site-card--selected" : ""}" data-site-id="${site.id}">
       <p class="site-card__eyebrow">
         <span class="site-card__badge">${site.siteType}</span>
         ${site.mrtWaypoint} MRT

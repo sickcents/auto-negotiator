@@ -2,8 +2,8 @@
 // public/js/components/*; each component only knows the DOM nodes it owns.
 
 import { api } from "./api.js";
-import { renderNetworkStatus, initSiteFilter } from "./components/networkStatus.js";
-import { renderMap, initMapTooltip } from "./components/mapView.js";
+import { renderNetworkStatus, initSiteFilter, initSiteCardSelection } from "./components/networkStatus.js";
+import { renderMap, initMapTooltip, panToSite } from "./components/mapView.js";
 import { populateSimSiteOptions, initSimulationControls } from "./components/simulationControls.js";
 import { renderTransferList } from "./components/transferList.js";
 import { markTransferSelected, renderTransferDetail } from "./components/transferDetail.js";
@@ -20,6 +20,7 @@ const state = {
   sites: [],
   transfers: [],
   selectedTransferId: null,
+  selectedSiteId: null,
   pollTimer: null,
   pollGeneration: 0,
   siteTypeFilter: new Set(["XL", "L", "M", "S"]),
@@ -28,8 +29,8 @@ const state = {
 async function loadSites() {
   const { sites } = await api("/sites");
   state.sites = sites;
-  renderNetworkStatus(state.sites, state.siteTypeFilter);
-  renderMap(state.sites, state.transfers, state.selectedTransferId, state.siteTypeFilter);
+  renderNetworkStatus(state.sites, state.siteTypeFilter, state.selectedSiteId);
+  renderMap(state.sites, state.transfers, state.selectedTransferId, state.siteTypeFilter, state.selectedSiteId);
   populateSimSiteOptions(state.sites);
   populateOverrideDonorOptions(state.sites);
   renderNavStatus(state.sites, state.transfers);
@@ -39,8 +40,21 @@ async function loadTransfers() {
   const { transfers } = await api("/transfers");
   state.transfers = transfers;
   renderTransferList(state.transfers, { selectedTransferId: state.selectedTransferId, onSelect: selectTransfer });
-  renderMap(state.sites, state.transfers, state.selectedTransferId, state.siteTypeFilter);
+  renderMap(state.sites, state.transfers, state.selectedTransferId, state.siteTypeFilter, state.selectedSiteId);
   renderNavStatus(state.sites, state.transfers);
+}
+
+// Card -> map highlight (#19): toggles off on a repeat click of the same
+// card, matches the map marker to it via a Link Blue ring distinct from the
+// donor/receiver Signal Orange treatment, and pans (without rezooming) to
+// it once on selection rather than on every subsequent re-render.
+function selectSite(id) {
+  state.selectedSiteId = state.selectedSiteId === id ? null : id;
+  renderNetworkStatus(state.sites, state.siteTypeFilter, state.selectedSiteId);
+  renderMap(state.sites, state.transfers, state.selectedTransferId, state.siteTypeFilter, state.selectedSiteId);
+  if (state.selectedSiteId != null) {
+    panToSite(state.sites.find((s) => s.id === state.selectedSiteId));
+  }
 }
 
 function selectTransfer(id) {
@@ -49,7 +63,7 @@ function selectTransfer(id) {
   state.selectedTransferId = id;
   markTransferSelected(id);
   renderTransferList(state.transfers, { selectedTransferId: id, onSelect: selectTransfer });
-  renderMap(state.sites, state.transfers, id, state.siteTypeFilter);
+  renderMap(state.sites, state.transfers, id, state.siteTypeFilter, state.selectedSiteId);
 
   refreshDetail(id); // console/timeline render immediately, whether or not a turn will run
 
@@ -167,10 +181,11 @@ initTransfersPaneExpand();
 initSiteFilter({
   onChange: (activeTypes) => {
     state.siteTypeFilter = activeTypes;
-    renderNetworkStatus(state.sites, state.siteTypeFilter);
-    renderMap(state.sites, state.transfers, state.selectedTransferId, state.siteTypeFilter);
+    renderNetworkStatus(state.sites, state.siteTypeFilter, state.selectedSiteId);
+    renderMap(state.sites, state.transfers, state.selectedTransferId, state.siteTypeFilter, state.selectedSiteId);
   },
 });
+initSiteCardSelection({ onSelect: selectSite });
 initSimulationControls({
   onTriggered: async () => {
     await loadSites();
