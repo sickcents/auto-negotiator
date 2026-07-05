@@ -601,9 +601,9 @@
   border: none;
 }
 
-/* Every site pin is one light ink-tint (#12): a lighter tone of the same warm
-   Ink hue as the recolored map, so pins read as a single legible family
-   against the muted base. Site Type stays encoded by the S/M/L/XL letter. */
+/* Base pin shape/shadow — color now comes from the Site Type modifiers
+   below (#24), not this single ink-tint. --color-marker stays as the
+   pre-type-color fallback (e.g. a site of an unrecognized type). */
 .map-marker {
   display: flex;
   align-items: center;
@@ -624,6 +624,34 @@
 
 .map-marker:hover {
   transform: scale(1.08);
+}
+
+/* Site Type color-coding (#24) — the same light-fill/strong-border pairing
+   already used for the Site Card badge and the type filter buttons, so a
+   site type reads as the same color everywhere in the app, not just on the
+   map. The light pastel fills stay legible against the dark map base from
+   #15 the same way the old single ink-tint did. Defined before the
+   donor/receiver role rules below so an active transfer's endpoints still
+   override this with the Signal Orange treatment. */
+.map-marker--XL {
+  background: var(--color-site-xl);
+  border-color: var(--color-site-xl-strong);
+  color: var(--color-site-xl-strong);
+}
+.map-marker--L {
+  background: var(--color-site-l);
+  border-color: var(--color-site-l-strong);
+  color: var(--color-site-l-strong);
+}
+.map-marker--M {
+  background: var(--color-site-m);
+  border-color: var(--color-site-m-strong);
+  color: var(--color-site-m-strong);
+}
+.map-marker--S {
+  background: var(--color-site-s);
+  border-color: var(--color-site-s-strong);
+  color: var(--color-site-s-strong);
 }
 
 /* Selected transfer endpoints (#13): both ends of the projected move light
