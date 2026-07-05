@@ -47,5 +47,6 @@ export function renderTransferDetail(detail) {
   renderAgentConsole(detail.agentSteps, detail.messages, {
     currentStatus: detail.transfer.status,
     transferId: detail.transfer.id,
+    transferCreatedAt: detail.transfer.createdAt,
   });
 }

@@ -11,7 +11,7 @@
 // DOM — nothing is ever interpolated raw. A plain-text mirror is kept for the
 // Copy button.
 
-import { STATUS_META, statusMeta } from "../format.js";
+import { STATUS_META, statusMeta, formatEventTime } from "../format.js";
 import { icon } from "../icons.js";
 import { escapeHtml, renderMarkdown } from "../markdown.js";
 
@@ -23,14 +23,14 @@ let thoughtOverrides = new Map(); // created_at -> user's explicit open/closed c
 let lastTransferId = null;
 let toggleListenerAttached = false;
 
-export function renderAgentConsole(agentSteps, messages, { currentStatus, transferId } = {}) {
+export function renderAgentConsole(agentSteps, messages, { currentStatus, transferId, transferCreatedAt } = {}) {
   if (transferId !== lastTransferId) {
     lastTransferId = transferId;
     openGroups = new Set(STATUS_ORDER); // fresh transfer selection -> fresh defaults
     thoughtOverrides = new Map();
   }
 
-  const events = mergeEvents(agentSteps, messages);
+  const events = mergeEvents(agentSteps, messages, transferCreatedAt);
 
   // Only the newest turn's reasoning is expanded by default; older turns stay
   // collapsed unless the viewer opened them (tracked in thoughtOverrides).
@@ -98,8 +98,13 @@ function ensureToggleListener(consoleEl) {
 // an email document, so drop the duplicate here to keep exactly one entry per
 // turn. Manager replies and Regional Director overrides have no backing step
 // and are kept.
-function mergeEvents(agentSteps, messages) {
+function mergeEvents(agentSteps, messages, transferCreatedAt) {
+  // Synthetic first event (#37): the Simulate Incident trigger that created
+  // the Transfer has no agent_steps/messages row of its own, so it's
+  // injected here to get a timestamp in the timeline like everything else.
+  const trigger = transferCreatedAt ? [{ kind: "trigger", at: transferCreatedAt }] : [];
   return [
+    ...trigger,
     ...agentSteps.map((s) => ({ kind: "step", at: s.created_at, ...s })),
     ...messages
       .filter((m) => m.sender !== "agent")
@@ -175,8 +180,18 @@ function groupHtml(status, events, ctx) {
 // ---------------------------------------------------------------------------
 
 function eventHtml(e, ctx) {
+  if (e.kind === "trigger") return triggerHtml(e);
   if (e.kind === "message") return messageHtml(e);
-  return `<article class="turn">${thoughtHtml(e, ctx)}${toolCardHtml(e)}</article>`;
+  return `<article class="turn">
+    <p class="turn__time">${escapeHtml(formatEventTime(e.at))}</p>
+    ${thoughtHtml(e, ctx)}${toolCardHtml(e)}
+  </article>`;
+}
+
+// The incident-trigger event (#37) — no tool call or reasoning of its own,
+// just when the Transfer actually came into being.
+function triggerHtml(e) {
+  return card(null, "Incident triggered", `<p class="tool-card__note">${escapeHtml(formatEventTime(e.at))}</p>`, "tool-card--trigger");
 }
 
 function thoughtHtml(step, ctx) {
@@ -239,17 +254,25 @@ function emailCard(args, result) {
 function messageHtml(m) {
   const meta = REPLY_META[m.sender] ?? { from: prettyName(m.sender), badge: "Message" };
   const rows = [docRow("From", meta.from), docRow("To", "Auto-Negotiator Agent")].join("");
-  return emailDoc({ rows, badge: meta.badge, badgeMod: "inbound", body: m.body, outbound: false });
+  return emailDoc({ rows, badge: meta.badge, badgeMod: "inbound", body: m.body, outbound: false, at: m.at });
 }
 
-function emailDoc({ rows, badge, badgeMod, body, outbound, note }) {
+function emailDoc({ rows, badge, badgeMod, body, outbound, note, at }) {
   const dir = outbound ? "email-doc--outbound" : "email-doc--inbound";
   const noteHtml = note ? `<p class="email-doc__note">${escapeHtml(note)}</p>` : "";
+  // Manager Replies and Regional Director actions (#37) aren't wrapped in a
+  // .turn article the way agent steps are, so they get their own inline
+  // timestamp here instead -- outbound send_email turns already get theirs
+  // from the .turn wrapper and don't pass `at`, so this stays empty for them.
+  const timeHtml = at ? `<span class="email-doc__time">${escapeHtml(formatEventTime(at))}</span>` : "";
   return `<div class="email-doc ${dir}">
     <div class="email-doc__head">
       ${icon("envelope-simple", "email-doc__icon")}
       <div class="email-doc__meta">${rows}</div>
-      <span class="email-doc__badge email-doc__badge--${badgeMod}">${escapeHtml(badge)}</span>
+      <div class="email-doc__side">
+        ${timeHtml}
+        <span class="email-doc__badge email-doc__badge--${badgeMod}">${escapeHtml(badge)}</span>
+      </div>
     </div>
     <div class="email-doc__body md">${renderMarkdown(body)}</div>
     ${noteHtml}
@@ -466,11 +489,12 @@ function normalize(value) {
 // ---------------------------------------------------------------------------
 
 function eventText(e) {
+  if (e.kind === "trigger") return `Incident triggered: ${formatEventTime(e.at)}`;
   if (e.kind === "message") {
     const meta = REPLY_META[e.sender] ?? { from: prettyName(e.sender) };
-    return `${meta.from}:\n${e.body ?? ""}`;
+    return `${meta.from} (${formatEventTime(e.at)}):\n${e.body ?? ""}`;
   }
-  const parts = [];
+  const parts = [`(${formatEventTime(e.at)})`];
   if (e.thought) parts.push(`Thinking: ${e.thought}`);
   const args = normalize(e.tool_args);
   const result = normalize(e.tool_result);

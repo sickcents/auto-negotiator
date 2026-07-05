@@ -20,6 +20,16 @@ export function statusMeta(status) {
   return STATUS_META[status] ?? { label: status, tone: "neutral" };
 }
 
+// Shared timestamp formatter for Agent Timeline events (#37) -- the incident
+// trigger, agent turns, Manager Replies, and Regional Director actions all
+// go through this instead of an ad hoc `new Date(...)` per call site, so
+// they read consistently. Month + day (not just time) because a Transfer's
+// history can span more than one day.
+export function formatEventTime(iso) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
 // Shared one-line description of a Transfer — the Transfer Detail header
 // (#29) reuses this verbatim so it reads as the same row expanded, not a
 // second, differently-worded description of the same transfer.

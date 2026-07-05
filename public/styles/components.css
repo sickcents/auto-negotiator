@@ -1347,6 +1347,15 @@
   margin-bottom: 0;
 }
 
+/* When this turn happened (#37) -- one line shared by every tool_name
+   variant instead of threading a timestamp through each card renderer. */
+.turn__time {
+  margin: 0 0 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-on-ink-muted);
+}
+
 /* Reasoning — collapsed by default (older turns), latest may be open. */
 .turn-thought {
   margin-bottom: 8px;
@@ -1640,6 +1649,22 @@
   min-width: 0;
   word-break: break-word;
 }
+/* Groups the badge with its new timestamp (#37) so .email-doc__head's
+   3-column grid (icon / meta / this) doesn't need a 4th column. */
+.email-doc__side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex: none;
+}
+
+.email-doc__time {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
 .email-doc__badge {
   flex: none;
   font-size: 10px;
