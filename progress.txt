@@ -23,3 +23,4 @@
 [23] Sticky headers on each scrollable panel - DONE
 [24] Shop icons on the map should follow the design system's colors - DONE
 [25] Network Status: standard scrollbar + breathing room - DONE
+[26] Transfers panel: drag handle instead of expand toggle - DONE
