@@ -28,3 +28,4 @@
 [28] Site Card legend: color-match Op. Threshold / Min Buffer + spacing - DONE
 [29] Transfer detail header: redesign as a ticket expansion - DONE
 [30] Network Status: header must sit outside the panel's scroll container - DONE
+[31] Transfers panel: resize handle needs a visible at-rest affordance - DONE
