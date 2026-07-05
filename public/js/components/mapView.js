@@ -5,23 +5,39 @@
 // of the old hand-rolled SVG projection.
 
 import { ACTIVE_ROUTE_STATUSES } from "../format.js";
+import { icon } from "../icons.js";
+import { haversineKm, courierEtaMinutes } from "../geo.js";
 
 const MARKER_SIZE = [40, 20];
 const OSM_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 const OSM_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+const COURIER_LOOP_MS = 6000; // one donor->receiver sweep of the direction indicator
 
 let map = null;
 let markerLayer = null;
 let routeLayer = null;
+let courierAnimationFrame = null;
 
 export function renderMap(sites, transfers = [], selectedTransferId = null, activeSiteTypes = null) {
   if (sites.length === 0) return;
   ensureMap(sites);
 
+  stopCourierAnimation();
   markerLayer.clearLayers();
   routeLayer.clearLayers();
 
   const bySiteId = new Map(sites.map((s) => [s.id, s]));
+
+  // The selected transfer's endpoints get highlighted markers (#13), so the
+  // projected move reads as "from this site, to this site" — not just a line.
+  const selected = transfers.find(
+    (t) =>
+      t.id === selectedTransferId &&
+      t.donorSiteId &&
+      ACTIVE_ROUTE_STATUSES.has(t.status) &&
+      bySiteId.has(t.donorSiteId) &&
+      bySiteId.has(t.receiverSiteId)
+  );
 
   transfers
     .filter(
@@ -34,19 +50,80 @@ export function renderMap(sites, transfers = [], selectedTransferId = null, acti
     .forEach((t) => {
       const donor = bySiteId.get(t.donorSiteId);
       const receiver = bySiteId.get(t.receiverSiteId);
-      const selected = t.id === selectedTransferId;
+      const isSelected = t.id === selectedTransferId;
       L.polyline(curvedLatLngs(donor, receiver), {
-        className: selected ? "map-route map-route--selected" : "map-route",
+        className: isSelected ? "map-route map-route--selected" : "map-route",
         interactive: false,
       }).addTo(routeLayer);
     });
 
+  if (selected) {
+    renderSelectedRouteExtras(bySiteId.get(selected.donorSiteId), bySiteId.get(selected.receiverSiteId));
+  }
+
   const visibleSites = activeSiteTypes ? sites.filter((s) => activeSiteTypes.has(s.siteType)) : sites;
   visibleSites.forEach((site) => {
-    L.marker([site.lat, site.lng], { icon: siteIcon(site) })
+    const role =
+      selected && site.id === selected.donorSiteId
+        ? "donor"
+        : selected && site.id === selected.receiverSiteId
+          ? "receiver"
+          : null;
+    L.marker([site.lat, site.lng], { icon: siteIcon(site, role), zIndexOffset: role ? 1000 : 0 })
       .bindTooltip(siteTooltipHtml(site), { className: "map-tooltip", direction: "top", offset: [0, -10] })
       .addTo(markerLayer);
   });
+}
+
+// Direction + magnitude for the selected route (#13): a Phosphor courier
+// truck sweeps donor -> receiver along the arc on a loop (the motion itself
+// is the direction indicator), and the arc midpoint carries the same
+// haversine distance / courier ETA the backend uses for donor ranking and
+// dispatch confirmations (client mirror in geo.js).
+function renderSelectedRouteExtras(donor, receiver) {
+  const points = curvedLatLngs(donor, receiver);
+
+  const distanceKm = haversineKm(donor, receiver);
+  const mid = points[Math.floor(points.length / 2)];
+  L.marker(mid, {
+    icon: L.divIcon({
+      className: "map-anno-icon",
+      html: `<span class="map-route-label">${distanceKm.toFixed(1)} km · ~${courierEtaMinutes(distanceKm)} min</span>`,
+      iconSize: [0, 0],
+    }),
+    interactive: false,
+  }).addTo(routeLayer);
+
+  const courier = L.marker(points[0], {
+    icon: L.divIcon({
+      className: "map-anno-icon",
+      html: `<span class="map-courier">${icon("truck", "map-courier__icon")}</span>`,
+      iconSize: [0, 0],
+    }),
+    interactive: false,
+  }).addTo(routeLayer);
+
+  // Phase derives from absolute time, so the sweep stays continuous across
+  // the frequent full re-renders the poll loop triggers.
+  const step = (now) => {
+    const t = (now % COURIER_LOOP_MS) / COURIER_LOOP_MS;
+    const scaled = t * (points.length - 1);
+    const i = Math.min(Math.floor(scaled), points.length - 2);
+    const frac = scaled - i;
+    courier.setLatLng([
+      points[i][0] + (points[i + 1][0] - points[i][0]) * frac,
+      points[i][1] + (points[i + 1][1] - points[i][1]) * frac,
+    ]);
+    courierAnimationFrame = requestAnimationFrame(step);
+  };
+  courierAnimationFrame = requestAnimationFrame(step);
+}
+
+function stopCourierAnimation() {
+  if (courierAnimationFrame != null) {
+    cancelAnimationFrame(courierAnimationFrame);
+    courierAnimationFrame = null;
+  }
 }
 
 // The old manual pointer-event delegation for a hand-positioned tooltip div
@@ -71,10 +148,11 @@ function ensureMap(sites) {
   return map;
 }
 
-function siteIcon(site) {
+function siteIcon(site, role = null) {
+  const roleClass = role ? ` map-marker--${role}` : "";
   return L.divIcon({
     className: "map-marker-icon",
-    html: `<span class="map-marker map-marker--${site.siteType}">${site.siteType}</span>`,
+    html: `<span class="map-marker map-marker--${site.siteType}${roleClass}">${site.siteType}</span>`,
     iconSize: MARKER_SIZE,
     iconAnchor: [MARKER_SIZE[0] / 2, MARKER_SIZE[1] / 2],
   });
