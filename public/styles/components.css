@@ -665,6 +665,57 @@
   transform: translateX(-50%) translateY(0);
 }
 
+/* Small info tooltip (#42) — same attr(aria-label)-as-tooltip technique as
+   .site-card__gauge-mark above, just self-positioned instead of relative to
+   a gauge. Used next to the Agent Timeline heading to explain when/why a
+   Transfer's donor can change mid-negotiation (Concession Protocol). Always
+   rendered on a light surface regardless of where the hint itself sits,
+   since its one use so far (the on-ink console header) would otherwise put
+   an ink tooltip on an ink background. */
+.info-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: help;
+  position: relative;
+}
+.info-hint::after {
+  content: attr(aria-label);
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  width: 240px;
+  transform: translateX(-50%) translateY(-4px);
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: normal;
+  background: var(--color-canvas-lifted);
+  color: var(--color-text-charcoal);
+  padding: 8px 10px;
+  border-radius: var(--radius-chip);
+  box-shadow: var(--shadow-1);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease, transform 120ms ease;
+  z-index: 5;
+}
+.info-hint:hover::after,
+.info-hint:focus-visible::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 .site-card__stat-legend {
   display: flex;
   flex-direction: column;
