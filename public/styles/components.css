@@ -1138,12 +1138,16 @@
   margin-top: var(--space-3);
 }
 
+/* Was a bare, unstyled <h3> — now shares the ticket's own panel-header
+   language (#33) instead of reading as a fourth, different heading style:
+   eyebrow dot + uppercase label, the same border-bottom/background as
+   .detail-header above it. --static for the same reason as .detail-header
+   (this scroll container already has a sticky header — the Agent Timeline
+   console's — and a second sticky element at top:0 would fight it for the
+   slot); --flush because .transfers-strip__timeline supplies its own
+   horizontal inset already, same as .detail-header. */
 .detail-block__title {
   margin: 0 0 8px;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--color-text-muted);
 }
 
 /* --- Agent Timeline — the other "media frame" surface, grouped by
@@ -1158,7 +1162,11 @@
   /* Top/sides moved onto .panel-header--on-ink and #agent-timeline (#27),
      matching the zero-padding-onto-children convention from #23. */
   padding: 0 0 var(--space-3);
-  box-shadow: var(--shadow-2);
+  /* No box-shadow (#33) — a floating-card shadow read as a second card
+     nested inside the ticket, on top of the ink background already telling
+     the "live agent log" apart from the ticket's own chrome. The frame is
+     an inset region of the ticket's scroll surface, not a separate raised
+     panel, so it shouldn't compete with .panel's shadow for elevation. */
 }
 
 .agent-timeline {
