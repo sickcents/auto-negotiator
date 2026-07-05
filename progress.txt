@@ -26,3 +26,4 @@
 [26] Transfers panel: drag handle instead of expand toggle - DONE
 [27] Prefactor: shared panel-header pattern - DONE
 [28] Site Card legend: color-match Op. Threshold / Min Buffer + spacing - DONE
+[29] Transfer detail header: redesign as a ticket expansion - DONE
