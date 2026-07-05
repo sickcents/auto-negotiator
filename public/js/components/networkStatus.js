@@ -54,19 +54,21 @@ function statRowHtml(label, current, threshold, buffer, isLow) {
     </div>
     <div
       class="site-card__gauge"
-      role="img"
+      role="group"
       aria-label="${label}: ${current} current, ${threshold} operating threshold, ${buffer} min buffer"
     >
       <span class="site-card__gauge-fill" style="width:${currentPct}%"></span>
       <span
         class="site-card__gauge-mark site-card__gauge-mark--threshold"
         style="left:${thresholdPct}%"
-        title="Operating Threshold: ${threshold}"
+        tabindex="0"
+        aria-label="Operating Threshold: ${threshold}"
       ></span>
       <span
         class="site-card__gauge-mark site-card__gauge-mark--buffer"
         style="left:${bufferPct}%"
-        title="Min Buffer: ${buffer}"
+        tabindex="0"
+        aria-label="Min Buffer: ${buffer}"
       ></span>
     </div>
     <div class="site-card__stat-legend">
