@@ -51,6 +51,7 @@ export async function resolveOverride(
 
   await openTicketTool.execute({ transferId });
   const dispatchResult = (await dispatchCourierTool.execute({
+    transferId,
     fromSiteId: donorSiteId,
     toSiteId: transfer.receiverSiteId,
     hardwareType: transfer.hardwareType,

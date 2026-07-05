@@ -20,6 +20,8 @@ export interface TransferRow {
   declinedSiteIds: string[];
   pushbackCount: number;
   escalationSent: boolean;
+  dispatchedAt: string | null;
+  estimatedArrivalAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -36,6 +38,8 @@ function rowToTransfer(row: any): TransferRow {
     declinedSiteIds: row.declined_site_ids ?? [],
     pushbackCount: row.pushback_count,
     escalationSent: row.escalation_sent,
+    dispatchedAt: row.dispatched_at,
+    estimatedArrivalAt: row.estimated_arrival_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -106,6 +110,27 @@ export async function setTransferStatus(id: number, status: TransferStatus): Pro
 
 export async function setTransferDonor(id: number, donorSiteId: string): Promise<void> {
   await sql("UPDATE transfers SET donor_site_id = $1, updated_at = now() WHERE id = $2", [donorSiteId, id]);
+}
+
+// Called once by dispatch_courier (#38): stamps dispatched_at at the DB's
+// clock and derives estimated_arrival_at from the already-computed ETA plus
+// a one-time jitter (in seconds, positive or negative) — never re-rolled on
+// later reads, so repeated fetches of the same Transfer see the same value.
+export async function recordDispatch(
+  id: number,
+  etaSecondsWithJitter: number
+): Promise<{ dispatchedAt: string; estimatedArrivalAt: string }> {
+  const rows = await sql(
+    `UPDATE transfers
+     SET dispatched_at = now(),
+         estimated_arrival_at = now() + make_interval(secs => $2),
+         updated_at = now()
+     WHERE id = $1
+     RETURNING dispatched_at, estimated_arrival_at`,
+    [id, etaSecondsWithJitter]
+  );
+  if (!rows[0]) throw new Error(`No such Transfer: ${id}`);
+  return { dispatchedAt: rows[0].dispatched_at, estimatedArrivalAt: rows[0].estimated_arrival_at };
 }
 
 // Concession Protocol re-routing (Q7/Q8): append to the exclusion list
