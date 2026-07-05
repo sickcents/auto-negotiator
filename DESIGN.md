@@ -417,7 +417,20 @@ Clicking a Network Status site card highlights that site's marker on the map, us
 - Clicking the already-selected card again toggles the selection off, clearing both highlights.
 - Selection state (`state.selectedSiteId` in `public/js/main.js`) is independent of the S/M/L/XL type filter and of the selected transfer — all three compose without interfering.
 
-## 13. App-Specific: Ops Map Tonal Filter (#15)
+## 13. App-Specific: Completed-Transfer Route Indicator (#20)
+
+`ACTIVE_ROUTE_STATUSES` (`public/js/format.js`) deliberately excludes `completed` — nothing is still moving — so completed transfers get their own, separate route treatment when selected, distinct from the active/in-progress one:
+
+| | Active/in-progress route (`.map-route`) | Completed route (`.map-route--completed`) |
+|---|---|---|
+| Color | Light Signal Orange | Dust Taupe (`--color-text-on-ink-muted`) |
+| Motion | Animated ambient dash-flow (`orbit-flow`), plus a courier truck sweeping donor → receiver on a loop when selected | Fully static — no animation of any kind |
+| Dash rhythm | `3 5` | `2 6` (a different rhythm, not just "paused", so the two read as different materials even in a still screenshot) |
+| Direction cue | The animated courier's motion | One fixed arrowhead (a rotated caret icon) at the arc's midpoint, angled to the curve's local tangent |
+
+`.map-route--completed` is its own class rather than a `.map-route` modifier, since `.map-route` always carries the orbit-flow animation. The two are mutually exclusive per render (`renderMap` in `public/js/components/mapView.js`): a selected transfer is either in `ACTIVE_ROUTE_STATUSES` (animated treatment) or `completed` (static treatment), never both.
+
+## 14. App-Specific: Ops Map Tonal Filter (#15)
 
 The Ops Map recolors OSM's fully-saturated tiles to a monotone plate by filtering only the Leaflet tile pane (`.map--ink .leaflet-tile-pane`); markers, route lines, tooltips, and the zoom control live in sibling panes and keep their own color. The recipe is seven named tokens in `public/styles/tokens.css`, composed in one `filter` rule in `components.css`:
 
