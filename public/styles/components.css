@@ -1,25 +1,40 @@
 /* ==========================================================================
-   App shell
+   App shell — a transparent overlay layer floating above the full-bleed
+   map (#12). It fills the viewport but stays click-through: only the actual
+   panels re-enable pointer events, so the map is still draggable in the gaps.
    ========================================================================== */
 
 .app-shell {
-  min-height: 100vh;
-  padding-top: var(--space-4);
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
 }
 
-/* --- Floating nav pill ---------------------------------------------------- */
+/* Re-enable interaction on the real panels; the shell and the layout-only
+   .side-rail wrapper stay click-through. */
+.nav-pill,
+.transfers-strip,
+.floating-panel {
+  pointer-events: auto;
+}
+
+/* --- Floating nav pill (top-left) ----------------------------------------- */
 
 .nav-pill {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-3);
-  max-width: 1280px;
-  margin: 0 auto var(--space-4);
-  padding: 12px var(--space-3);
-  background: var(--color-surface);
+  padding: 10px 20px 10px 14px;
+  background: var(--color-glass);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+  border: 1px solid var(--color-glass-border);
   border-radius: var(--radius-pill);
-  box-shadow: var(--shadow-1);
+  box-shadow: var(--shadow-2);
 }
 
 .nav-pill__brand {
@@ -60,75 +75,76 @@
   white-space: nowrap;
 }
 
-/* ==========================================================================
-   Transfers strip — always-visible, sits above the map stage (#5)
-   ========================================================================== */
-
-.transfers-strip {
-  display: grid;
-  grid-template-columns: minmax(260px, 320px) 1fr;
-  gap: var(--space-3);
-  max-width: 1280px;
-  margin: var(--space-3) auto 0;
-}
-
-.transfers-strip__list {
-  max-height: 480px;
-  overflow-y: auto;
-}
-
+/* Frosted panel — the shared overlay surface. Every panel now sits over live
+   map tiles, so it needs its own translucent-cream plate + blur to stay
+   legible instead of resting on the (now hidden) opaque canvas. */
 .panel {
-  background: var(--color-canvas-lifted);
-  border: 1px solid var(--color-border);
+  background: var(--color-glass);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+  border: 1px solid var(--color-glass-border);
   border-radius: var(--radius-button);
   padding: var(--space-3);
-}
-
-/* ==========================================================================
-   Map stage — the Ops Map as a full-bleed hero layer, with Network Status
-   and Simulate Incident floating over it rather than sharing a grid cell.
-   ========================================================================== */
-
-.map-stage {
-  position: relative;
-  max-width: 1280px;
-  height: 680px;
-  margin: var(--space-3) auto var(--space-6);
-}
-
-.map-stage .map-frame {
-  position: absolute;
-  inset: 0;
-  height: auto;
-  z-index: 1;
-  border-radius: var(--radius-signal);
-  /* Leaflet's tile pane is GPU-composited (transform: translate3d); pin
-     this to its own stacking context so that layer promotion can never
-     paint over the floating panels above it. */
-  isolation: isolate;
-}
-
-.floating-panel {
-  position: absolute;
-  z-index: 2;
-  width: 300px;
-  overflow-y: auto;
   box-shadow: var(--shadow-2);
 }
 
-.floating-panel--network {
-  top: var(--space-3);
-  bottom: var(--space-3);
+/* ==========================================================================
+   Transfers strip — the primary workspace, now a tall left rail (#12).
+   List on top, live Agent Timeline + human-input controls below; each region
+   scrolls inside the fixed-height rail so the panel itself never grows.
+   ========================================================================== */
+
+.transfers-strip {
+  position: absolute;
   left: var(--space-3);
+  top: 84px; /* clears the nav pill above it */
+  bottom: var(--space-3);
+  width: clamp(340px, 27vw, 420px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  overflow: hidden;
+}
+
+.transfers-strip__list {
+  flex: 0 1 auto;
+  max-height: 40%;
+  overflow-y: auto;
+}
+
+.transfers-strip__timeline {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* ==========================================================================
+   Side rail — Network Status over Simulate Incident, docked to the right
+   edge (#12). A layout-only wrapper (click-through); its panels re-enable
+   pointer events. Capped short of the bottom so the zoom control and OSM
+   attribution keep the bottom-right corner to themselves.
+   ========================================================================== */
+
+.side-rail {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  width: clamp(300px, 23vw, 360px);
+  max-height: calc(100vh - var(--space-3) - 100px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  pointer-events: none;
+}
+
+.floating-panel--network {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .floating-panel--sim {
-  top: var(--space-3);
-  right: var(--space-3);
-  width: 30%;
-  min-width: 280px;
-  max-width: 380px;
-  max-height: calc(100% - 2 * var(--space-3));
+  flex: 0 0 auto;
 }
 
 /* ==========================================================================
@@ -338,32 +354,86 @@
 }
 
 /* ==========================================================================
-   Ops Map (signature element)
+   Ops Map (signature element) — full-bleed, fixed ink background layer (#12)
    ========================================================================== */
 
+/* The map is the page background: pinned to the viewport, behind the overlay
+   shell, with no card chrome (no max-width, radius, border, or shadow). */
+.map-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
 .map-frame {
-  position: relative;
-  height: 420px;
-  border-radius: var(--radius-stadium);
-  background: var(--color-ink);
-  box-shadow: var(--shadow-2);
+  position: absolute;
+  inset: 0;
+  background: var(--color-map-base);
   overflow: hidden;
 }
 
 .map {
   width: 100%;
   height: 100%;
-  background: var(--color-ink);
+  background: var(--color-map-base);
 }
 
-/* Leaflet's zoom control / attribution sit close to the frame edge by
-   default; nudge them clear of the stadium corner radius so they don't
-   get clipped by .map-frame's overflow: hidden. */
+/* --- Ink-toned monochrome tile recolor -----------------------------------
+   OSM ships warm, fully-saturated cartography (green parks, blue water,
+   cream land). To fold it down to a dark near-monochrome that sits *under*
+   the Ink UI, we filter ONLY the Leaflet tile pane — markers, route SVGs,
+   tooltips and the zoom control live in sibling panes and keep their color:
+     grayscale(1)   strip all cartographic hue          → neutral greys
+     invert(1)      flip luminance                       → dark land, light roads/labels
+     brightness(.82) sink the whole plate toward ink
+     contrast(.9)   soften the harsh inverted edges
+     sepia(.35) + hue-rotate(-12deg) + saturate(.6)      re-warm the greys a
+                    touch toward the warm Ink (#141413) tone, not a cold slate */
+.map--ink .leaflet-tile-pane {
+  filter: grayscale(1) invert(1) brightness(0.82) contrast(0.9) sepia(0.35) hue-rotate(-12deg) saturate(0.6);
+}
+
+/* Leaflet controls over the ink base: frost them to match the panels and
+   keep the native +/- zoom affordance legible on the dark plate. Nudged in
+   from the edge so they clear the floating panels. */
 .map-frame .leaflet-top.leaflet-left,
 .map-frame .leaflet-top.leaflet-right,
 .map-frame .leaflet-bottom.leaflet-left,
 .map-frame .leaflet-bottom.leaflet-right {
-  margin: 18px;
+  margin: var(--space-3);
+}
+
+.leaflet-control-zoom.leaflet-bar {
+  border: 1px solid var(--color-glass-border);
+  border-radius: var(--radius-button);
+  overflow: hidden;
+  box-shadow: var(--shadow-2);
+}
+
+.leaflet-control-zoom a {
+  background: var(--color-glass-ink);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: var(--color-text-on-ink);
+  border-bottom: 1px solid var(--color-border-on-ink);
+}
+
+.leaflet-control-zoom a:hover {
+  background: rgba(20, 20, 19, 0.82);
+  color: #fff;
+}
+
+.leaflet-control-attribution {
+  background: var(--color-glass-ink) !important;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: var(--color-text-on-ink-muted) !important;
+  border-radius: var(--radius-chip) 0 0 0;
+  padding: 2px 8px;
+}
+
+.leaflet-control-attribution a {
+  color: var(--color-text-on-ink) !important;
 }
 
 /* Reset Leaflet's default white/bordered div-icon box — the badge itself
@@ -373,6 +443,9 @@
   border: none;
 }
 
+/* Every site pin is one light ink-tint (#12): a lighter tone of the same warm
+   Ink hue as the recolored map, so pins read as a single legible family
+   against the muted base. Site Type stays encoded by the S/M/L/XL letter. */
 .map-marker {
   display: flex;
   align-items: center;
@@ -383,31 +456,16 @@
   font-size: 10px;
   font-weight: 700;
   border-radius: var(--radius-pill);
-  border: 1.5px solid var(--color-canvas);
-  box-shadow: var(--shadow-1);
+  border: 1.5px solid var(--color-ink);
+  background: var(--color-marker);
+  color: var(--color-ink);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
   cursor: pointer;
   transition: transform 120ms ease;
 }
 
 .map-marker:hover {
   transform: scale(1.08);
-}
-
-.map-marker--XL {
-  background: var(--color-site-xl);
-  color: var(--color-site-xl-strong);
-}
-.map-marker--L {
-  background: var(--color-site-l);
-  color: var(--color-site-l-strong);
-}
-.map-marker--M {
-  background: var(--color-site-m);
-  color: var(--color-site-m-strong);
-}
-.map-marker--S {
-  background: var(--color-site-s);
-  color: var(--color-site-s-strong);
 }
 
 .map-route {
@@ -740,34 +798,48 @@
    Responsive
    ========================================================================== */
 
+/* Two side-by-side rails need room to spare on either edge of the map. Below
+   that, the map stays a fixed ambient backdrop and the shell becomes a single
+   scrollable column of frosted panels stacked over it (#12). */
 @media (max-width: 1023px) {
+  .app-shell {
+    position: relative; /* scroll in flow, but paint above the fixed map */
+    z-index: 1;
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    max-width: 640px;
+    margin: 0 auto;
+    padding: var(--space-3);
+  }
+
+  .nav-pill {
+    position: static;
+  }
+
   .transfers-strip {
-    grid-template-columns: 1fr;
+    position: static;
+    width: auto;
+    top: auto;
+    bottom: auto;
+    overflow: visible;
   }
   .transfers-strip__list {
     max-height: 240px;
   }
+  .transfers-strip__timeline {
+    overflow: visible;
+  }
 
-  /* Floating panels only work with room to spare either side of the map;
-     below that, stack map → network → sim like plain panels instead. */
-  .map-stage {
-    height: auto;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-    padding: 0 var(--space-3);
-  }
-  .map-stage .map-frame {
-    position: static;
-    height: 320px;
-  }
-  .floating-panel,
-  .floating-panel--network,
-  .floating-panel--sim {
+  .side-rail {
     position: static;
     width: auto;
-    max-width: none;
     max-height: none;
+    pointer-events: auto;
+  }
+  .floating-panel--network {
+    overflow: visible;
   }
 }
 

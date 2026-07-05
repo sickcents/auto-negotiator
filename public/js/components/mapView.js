@@ -57,9 +57,10 @@ export function initMapTooltip() {}
 function ensureMap(sites) {
   if (map) return map;
 
-  // Default topleft zoom control would sit underneath the floating Network
-  // Status panel (docked to the full left edge) — bottomright stays clear
-  // of both floating panels in the dashboard shell (#3).
+  // Since #12 the map is a full-bleed background with panels floating over
+  // it: the transfers rail owns the left edge and the Network/Sim side-rail
+  // owns the top-right (capped short of the bottom). bottomright keeps the
+  // zoom control and OSM attribution clear of every panel.
   map = L.map("map", { attributionControl: true, zoomControl: false }).fitBounds(
     L.latLngBounds(sites.map((s) => [s.lat, s.lng])).pad(0.25)
   );

@@ -42,6 +42,19 @@
   --color-border: rgba(20, 20, 19, 0.12);
   --color-border-on-ink: rgba(243, 240, 238, 0.18);
 
+  /* --- Overlay surfaces (every panel now floats over the live ink map) ----
+     The map is a full-bleed background, so panels can no longer sit on the
+     opaque cream canvas — they need their own frosted surface that stays
+     legible over moving, muted tiles. Lifted Cream at ~88% opacity + a blur
+     keeps text crisp while letting the map read faintly through. */
+  --color-glass: rgba(252, 251, 250, 0.88); /* Lifted Cream, frosted overlay */
+  --color-glass-border: rgba(255, 255, 255, 0.5); /* soft top-highlight edge */
+  --color-glass-ink: rgba(20, 20, 19, 0.66); /* Ink glass — map controls over tiles */
+
+  /* --- Ops-map palette --------------------------------------------------- */
+  --color-map-base: #141413; /* Ink backdrop shown before/around tiles */
+  --color-marker: #f3f0ee; /* single light ink-tint used by every site pin */
+
   /* --- Type -------------------------------------------------------------- */
   --font-display: "Sofia Sans", "Inter", "Segoe UI", Arial, sans-serif;
   --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
