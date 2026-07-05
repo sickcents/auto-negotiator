@@ -463,6 +463,25 @@ The Ops Map recolors OSM's fully-saturated tiles to a monotone plate by filterin
 
 This replaced a starker recipe (`invert(1) brightness(0.82) contrast(0.9) sepia(0.35) hue-rotate(-12deg) saturate(0.6)` on `--color-map-base: #141413`) that read as high-contrast dark-ink rather than "comforting." Route lines and markers use Signal Orange / Light Signal Orange (Section 2), which stay legible against this base since they render in unfiltered sibling panes — any future retuning of these tokens should keep that contrast in mind.
 
+## 17. App-Specific: Site Marker Color-Coding (#24)
+
+Site markers on the map are colored by **Site Type**, using the exact same tokens as the Site Card badge and the type filter buttons (Section 2's Site Type badge palette) — a site type reads as the same color everywhere in the app, not a map-only scheme:
+
+| Type | Fill | Border / label | Tokens |
+|------|------|-----------------|--------|
+| XL | `--color-site-xl` | `--color-site-xl-strong` | `.map-marker--XL` |
+| L | `--color-site-l` | `--color-site-l-strong` | `.map-marker--L` |
+| M | `--color-site-m` | `--color-site-m-strong` | `.map-marker--M` |
+| S | `--color-site-s` | `--color-site-s-strong` | `.map-marker--S` |
+
+These replace the old single `--color-marker` ink-tint every pin used regardless of type. The light pastel fills stay legible against the dark Warm Charcoal map base from #15, the same way the old uniform off-white tint did.
+
+The donor/receiver route-highlight override (#13) still works and is still visually distinct, layered on top rather than replaced:
+- **Donor** (`.map-marker--donor`) keeps its Site Type fill/label color as the base "light pin" and adds only a Signal Orange border + ring (`box-shadow`) — the pin now carries two pieces of information (type + "stock is leaving here") instead of one.
+- **Receiver** (`.map-marker--receiver`) still fully overrides to a solid Signal Orange fill with white text, unchanged from #13.
+
+Both role rules are declared after the Site Type rules in `components.css`, so on ties (a marker can carry both a type class and a role class at once) the role rule wins for whichever properties it sets — no `!important` needed.
+
 ### Known Gaps
 - The live page uses MarkForMC, a proprietary licensed typeface. Sofia Sans is the closest open-source substitute and is listed in Mastercard's own fallback stack.
 - Tablet breakpoint specifics (768–1023px) were inferred from desktop and mobile captures; intermediate layouts may vary per section.
