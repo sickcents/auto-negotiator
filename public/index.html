@@ -143,15 +143,19 @@
         <h2 class="eyebrow panel-header panel-header--bleed-corner panel-header--static" id="sim-heading">Simulate Incident</h2>
         <div class="controls-row">
           <select id="sim-site" class="select" aria-label="Site"></select>
-          <select id="sim-hardware" class="select" aria-label="Hardware type">
-            <option value="scanner">Scanner (TC58)</option>
-            <option value="printer">Printer (ZQ521)</option>
-          </select>
-          <input id="sim-drop-to" type="number" value="0" min="0" class="input input--qty" aria-label="Drop stock to" />
-          <button id="sim-btn" class="btn btn--primary">Trigger shortage</button>
+          <div class="input-group">
+            <select id="sim-hardware" class="select" aria-label="Hardware type">
+              <option value="scanner">Scanner (TC58)</option>
+              <option value="printer">Printer (ZQ521)</option>
+            </select>
+            <input id="sim-drop-to" type="number" value="0" min="0" class="input input--qty" aria-label="Drop stock to" />
+          </div>
         </div>
         <p id="sim-site-levels" class="hint" aria-live="polite"></p>
         <p id="sim-result" class="hint"></p>
+        <div class="sim-actions">
+          <button id="sim-btn" class="btn btn--primary">Trigger shortage</button>
+        </div>
       </section>
     </aside>
   </div>
