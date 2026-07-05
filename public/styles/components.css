@@ -681,7 +681,10 @@
   line-height: 1.55;
   max-height: 320px;
   overflow-y: auto;
-  white-space: pre-wrap;
+  /* Content is structured elements now (turn cards, email docs), not a flat
+     pre-wrapped log — normal white-space so template-literal indentation
+     between blocks doesn't render as stray gaps. */
+  white-space: normal;
 }
 
 .timeline-group {
@@ -717,23 +720,349 @@
   border-left: 2px solid var(--color-border-on-ink);
 }
 
-.agent-timeline .line {
-  margin-bottom: 10px;
+/* --- Per-turn rendering (#10) --------------------------------------------
+   Each turn is one <article class="turn">: a collapsible reasoning block plus
+   a domain-specific tool card. Two surface tiers, matching DESIGN.md's
+   "paper on paper" idea: tool actions read as subtle data cards on the ink
+   frame; emails/replies read as cream "document" paper laid on top. */
+
+.turn {
+  margin-bottom: 14px;
 }
-.agent-timeline .thought {
+.turn:last-child {
+  margin-bottom: 0;
+}
+
+/* Reasoning — collapsed by default (older turns), latest may be open. */
+.turn-thought {
+  margin-bottom: 8px;
+}
+.turn-thought__summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--color-text-on-ink-muted);
 }
-.agent-timeline .tool {
+.turn-thought__summary::-webkit-details-marker {
+  display: none;
+}
+.turn-thought__caret {
+  width: 0.85em;
+  height: 0.85em;
+  transition: transform 0.15s ease;
+}
+.turn-thought[open] > .turn-thought__summary .turn-thought__caret {
+  transform: rotate(90deg);
+}
+.turn-thought__body {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  color: var(--color-text-on-ink-muted);
+}
+
+/* Prose rendered from the safe Markdown renderer. Reads better in the display
+   face than the mono timeline default. */
+.md {
+  font-family: var(--font-display);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.md p {
+  margin: 0 0 6px;
+}
+.md p:last-child {
+  margin-bottom: 0;
+}
+.md ul,
+.md ol {
+  margin: 4px 0 6px;
+  padding-left: 20px;
+}
+.md li {
+  margin-bottom: 2px;
+}
+.md code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  padding: 1px 5px;
+  border-radius: var(--radius-chip);
+  background: rgba(255, 255, 255, 0.08);
+}
+.md strong {
+  font-weight: 700;
+}
+
+/* --- Tool cards (data tier) ---------------------------------------------- */
+
+.tool-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--color-border-on-ink);
+  border-radius: var(--radius-button);
+  padding: 12px 14px;
+}
+.tool-card__head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 10px;
+}
+.tool-card__icon {
+  width: 1.05em;
+  height: 1.05em;
   color: var(--color-signal-light);
 }
-.agent-timeline .message-agent {
-  color: #bfe3c9;
+.tool-card__title,
+.tool-card__tool {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-on-ink-muted);
 }
-.agent-timeline .message-manager {
+.tool-card__tool {
+  color: var(--color-signal-light);
+}
+.tool-card__note {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  color: var(--color-text-on-ink-muted);
+}
+.tool-card__error {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 12.5px;
   color: #f3a897;
 }
-.agent-timeline .message-regional_director {
+
+/* Key/value grid used by dispatch, zpl, and the generic fallback. */
+.kv-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 14px;
+}
+.kv {
+  display: contents;
+}
+.kv__k {
+  color: var(--color-text-on-ink-muted);
+  font-size: 11px;
+}
+.kv__v {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--color-text-on-ink);
+  word-break: break-word;
+}
+
+/* rank_donors table */
+.donor-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11.5px;
+}
+.donor-tbl th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-text-on-ink-muted);
+  padding: 0 10px 6px 0;
+  border-bottom: 1px solid var(--color-border-on-ink);
+}
+.donor-tbl td {
+  padding: 5px 10px 5px 0;
+  border-bottom: 1px solid rgba(243, 240, 238, 0.08);
+}
+.donor-tbl tr:last-child td {
+  border-bottom: none;
+}
+.donor-tbl__rank {
+  color: var(--color-text-on-ink-muted);
+  width: 1.5em;
+}
+.donor-tbl__num {
+  font-family: var(--font-mono);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ZPL / generic JSON payload preview */
+.code-preview {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-chip);
+  background: rgba(0, 0, 0, 0.28);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--color-text-on-ink);
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+/* Compact ticket status line */
+.ticket-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+}
+.ticket-line .tool-card__title {
+  margin: 0;
+}
+.ticket-line__status {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+}
+.ticket-line__status--open {
+  background: rgba(56, 96, 190, 0.22);
   color: #a9c2f0;
+}
+.ticket-line__status--closed {
+  background: rgba(243, 240, 238, 0.12);
+  color: var(--color-text-on-ink-muted);
+}
+.ticket-line__status--error {
+  background: rgba(207, 69, 0, 0.22);
+  color: #f3a897;
+}
+.ticket-line__detail {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-on-ink-muted);
+}
+
+/* Terminal outcome ("none" tool step) */
+.tool-card--outcome {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.tool-card--outcome .tool-card__title {
+  margin: 0;
+}
+
+/* Generic fallback: result JSON tucked into a <details>. */
+.tool-json {
+  margin-top: 8px;
+}
+.tool-json__summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  font-size: 11px;
+  color: var(--color-text-on-ink-muted);
+}
+.tool-json__summary::-webkit-details-marker {
+  display: none;
+}
+.tool-json__caret {
+  width: 0.85em;
+  height: 0.85em;
+  transition: transform 0.15s ease;
+}
+.tool-json[open] > .tool-json__summary .tool-json__caret {
+  transform: rotate(90deg);
+}
+
+/* --- Email document (paper tier) ----------------------------------------- */
+
+.email-doc {
+  background: var(--color-canvas-lifted);
+  color: var(--color-text);
+  border-radius: var(--radius-button);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-1);
+}
+.email-doc--inbound {
+  background: var(--color-canvas);
+  border-left: 3px solid var(--color-link);
+}
+.email-doc__head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  gap: 10px;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+.email-doc__icon {
+  width: 1.2em;
+  height: 1.2em;
+  margin-top: 1px;
+  color: var(--color-text-muted);
+}
+.email-doc__meta {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+.email-doc__row {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+}
+.email-doc__k {
+  flex: none;
+  width: 3.5em;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+.email-doc__v {
+  color: var(--color-text-charcoal);
+  min-width: 0;
+  word-break: break-word;
+}
+.email-doc__badge {
+  flex: none;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+.email-doc__badge--initial {
+  background: var(--color-canvas);
+  color: var(--color-text-muted);
+}
+.email-doc__badge--firmness_lock {
+  background: var(--color-ink);
+  color: var(--color-text-on-ink);
+}
+.email-doc__badge--escalation {
+  background: rgba(207, 69, 0, 0.14);
+  color: var(--color-signal);
+}
+.email-doc__badge--inbound {
+  background: rgba(56, 96, 190, 0.12);
+  color: var(--color-link);
+}
+.email-doc__body {
+  color: var(--color-text-charcoal);
+}
+/* Inline code on the cream email paper needs a dark-on-light chip, not the
+   white-on-ink one used inside the dark timeline frame. */
+.email-doc__body.md code {
+  background: rgba(20, 20, 19, 0.06);
+}
+.email-doc__note {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--color-signal);
 }
 
 /* ==========================================================================
