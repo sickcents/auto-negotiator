@@ -152,18 +152,50 @@
   padding-right: 0;
 }
 
-/* For a --flush header that is *also* the first child of its .panel-padded
-   ancestor (Transfers list, Simulate Incident) — not just horizontal inset
-   but the ancestor's top padding is redundant with the header's own too,
-   stacking to double the gap above the header text (#32). Network Status's
-   header doesn't hit this: its ancestor panel carries no padding of its own
-   (#23/#30), so the header's own top padding is the only contribution.
-   Transfer Detail's header doesn't use this either — it follows the
-   Transfers list within the same outer panel rather than sitting directly
-   against the panel's own top padding, so its own top padding is real,
-   non-redundant spacing, not a stacked duplicate. */
-.panel-header--flush-top {
-  padding-top: 0;
+/* A header that is the first child of a .panel-padded ancestor (Transfers
+   list, Simulate Incident) sits ~24px inside the panel's own padding on
+   every side — miles clear of the panel's rounded corners, unlike Network
+   Status's header, which is genuinely flush against the panel edge (its
+   ancestor's own padding is zeroed, #23/#30) and reads as the panel's own
+   top bar. Design feedback (live, with screenshots): the inset version
+   reads as a separate floating rectangle sitting inside the panel, not
+   the same surface — Network Status's flush, edge-to-edge, rounded-corner
+   header is the one that "looks right" (#34 follow-up).
+   These two modifiers pull such a header back out to the panel's true
+   edge with a negative margin equal to the ambient padding it's sitting
+   inside, then rely on the header's own *unmodified* base padding
+   (`padding: var(--space-3) var(--space-3) var(--space-2)`) to push the
+   text back to exactly where it was — the margin and the padding cancel,
+   so this changes the header's box position (and lets .panel's
+   `overflow: hidden` clip its corners to match the panel's own rounding)
+   without moving a single line of text. */
+/* Compounded with .panel-header (not just the modifier alone) to outrank
+   .panel-header.eyebrow's own margin: 0 above — both are equally specific,
+   so without this the eyebrow rule would win by only being a few lines
+   earlier and silently zero these margins back out. */
+.panel-header.panel-header--bleed-corner {
+  margin: calc(-1 * var(--space-3)) calc(-1 * var(--space-3)) 0;
+}
+
+/* Left only — for the Transfers list header, which stays position: sticky
+   (it genuinely needs to pin while transfer rows scroll beneath it, unlike
+   Simulate Incident's --static header above) and shares its scroll
+   container with a persistent scrollbar (#14/#25) on the right. Bleeding
+   the right side would put the header flush against the scrollbar thumb;
+   the container's existing right-side inset (ambient padding + its own
+   scrollbar gutter) is already correct and untouched, so this only
+   restores the header's own left padding that `--flush` zeroes
+   (`--flush`'s `padding-right: 0` is still exactly right and stays in
+   effect). There's no margin-top/padding-top pair here the way
+   --bleed-corner has one: a sticky element's `top: 0` anchors to its
+   scrolling ancestor's *padding* edge, so a negative margin-top trying to
+   pull it above that edge is silently clamped back — the vertical half of
+   this fix instead zeroes .transfers-strip's own padding-top directly
+   (below), which is what actually moves the anchor edge (and thus the
+   sticky header) up to the panel's true top. */
+.panel-header.panel-header--bleed-top-left {
+  margin-left: calc(-1 * var(--space-3));
+  padding-left: var(--space-3);
 }
 
 /* Transfer Detail's header shares its scroll container with the Agent
@@ -172,10 +204,13 @@
    the former. Transfer Detail only adopts the shared typography/padding/
    separator here; genuine sticky-ness for it is out of scope (a follow-up
    issue redesigns this header to read as a ticket expansion instead).
-   Also used by Network Status (#30), whose header now lives outside its
-   panel's scroll region entirely — with no scrolling ancestor, sticky
-   would be an inert no-op there, so --static states the plain, static
-   reality instead of relying on that no-op. */
+   Also used by Network Status (#30) and Simulate Incident (#34 follow-up),
+   neither of which scroll internally, so sticky positioning is functionally
+   inert for both — and worse than inert once .panel gained overflow:hidden
+   (#34), since that makes the panel itself a scroll container that sticky's
+   `top: 0` then anchors to, clamping the header at the panel's *padding*
+   edge and silently cancelling a --bleed-corner negative margin trying to
+   pull it out to the true edge. --static sidesteps that entirely. */
 .panel-header--static {
   position: static;
 }
@@ -211,6 +246,18 @@
      expansion continuing directly off the list, not a second card floating
      below a dead strip of background. */
   overflow: hidden;
+  /* Zeroed instead of the .panel default (#34 follow-up): the Transfers
+     list header stays position: sticky (unlike Simulate Incident's, it
+     genuinely needs to pin while rows scroll beneath it), and sticky's
+     `top: 0` anchors to this panel's own *padding* edge now that
+     `overflow: hidden` makes it a scroll container. Leaving padding-top at
+     the .panel default would anchor the header 24px below the panel's true
+     top — same effect as the corner-flush problem `--bleed-corner` solves
+     with a margin, except a margin can't win here (see
+     .panel-header--bleed-top-left above), so the padding itself has to
+     move instead. Left/right/bottom stay at the .panel default; only the
+     header sits at this container's true top, so only top needs zeroing. */
+  padding-top: 0;
 }
 
 /* Continuous drag-to-resize handle (#26) — replaces the #16 two-state
@@ -350,6 +397,9 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  /* Breathing room below the header's border-bottom — without it the
+     filter row sits flush against the divider (design feedback, live). */
+  margin-top: var(--space-2);
 }
 
 .floating-panel--sim {
@@ -938,6 +988,15 @@
   align-items: center;
 }
 
+/* Breathing room below Simulate Incident's header, matching the other
+   panel headers (design feedback, live) — bigger than the incidental 8px
+   .controls-row already gets from its own top/bottom margin above, which
+   exists for spacing between stacked rows, not specifically for clearing
+   a header's border-bottom. */
+#sim-heading + .controls-row {
+  margin-top: var(--space-2);
+}
+
 .select,
 .input {
   border: 1.5px solid var(--color-ink);
@@ -1047,6 +1106,9 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  /* Breathing room below the header's border-bottom — without it the
+     first row sits flush against the divider (design feedback, live). */
+  margin-top: var(--space-2);
 }
 
 .transfer-row {
