@@ -147,7 +147,11 @@
    same top:0 would fight over the same slot, with the later one covering
    the former. Transfer Detail only adopts the shared typography/padding/
    separator here; genuine sticky-ness for it is out of scope (a follow-up
-   issue redesigns this header to read as a ticket expansion instead). */
+   issue redesigns this header to read as a ticket expansion instead).
+   Also used by Network Status (#30), whose header now lives outside its
+   panel's scroll region entirely — with no scrolling ancestor, sticky
+   would be an inert no-op there, so --static states the plain, static
+   reality instead of relying on that no-op. */
 .panel-header--static {
   position: static;
 }
@@ -248,28 +252,30 @@
 /* One scrollbar per logical region (#14): thin, ink-toned, cross-browser via
    plain CSS (scrollbar-width/-color + the -webkit- pseudo-elements) rather
    than a dependency — two properties cover every evergreen browser. Also
-   applied to .floating-panel--network (#25) so the Network Status panel's
-   scroll region matches instead of falling back to the OS default. */
+   applied to .floating-panel--network__body (#25, moved off the panel
+   itself by #30 once the header was split out of the scroll region) so the
+   Network Status scroll region matches instead of falling back to the OS
+   default. */
 .transfers-strip__list,
 .transfers-strip__timeline,
-.floating-panel--network {
+.floating-panel--network__body {
   scrollbar-width: thin;
   scrollbar-color: rgba(20, 20, 19, 0.22) transparent;
 }
 .transfers-strip__list::-webkit-scrollbar,
 .transfers-strip__timeline::-webkit-scrollbar,
-.floating-panel--network::-webkit-scrollbar {
+.floating-panel--network__body::-webkit-scrollbar {
   width: 6px;
 }
 .transfers-strip__list::-webkit-scrollbar-thumb,
 .transfers-strip__timeline::-webkit-scrollbar-thumb,
-.floating-panel--network::-webkit-scrollbar-thumb {
+.floating-panel--network__body::-webkit-scrollbar-thumb {
   background: rgba(20, 20, 19, 0.22);
   border-radius: var(--radius-pill);
 }
 .transfers-strip__list::-webkit-scrollbar-track,
 .transfers-strip__timeline::-webkit-scrollbar-track,
-.floating-panel--network::-webkit-scrollbar-track {
+.floating-panel--network__body::-webkit-scrollbar-track {
   background: transparent;
 }
 
@@ -292,20 +298,32 @@
   pointer-events: none;
 }
 
-/* Padding moves off the scroll container onto its children (#23): sticky
-   `top: 0` on a descendant anchors to the *padding edge* of the nearest
-   scrolling ancestor, so as long as .floating-panel--network itself (the
-   scroll container) carried .panel's padding, the sticky heading could
-   only ever reach that padding edge — 24px short of the panel's true top —
-   no matter what margin trick was applied to the heading itself. Zeroing
-   the container's padding and restoring it on the .panel-header /
-   .site-filter / .site-cards individually lets the heading reach the real
-   edge and stick flush, background included. */
+/* #23 zeroed this panel's own padding and restored it individually on
+   .panel-header / .site-filter / .site-cards, because a sticky heading's
+   `top: 0` anchors to the *padding edge* of its nearest scrolling ancestor —
+   and this panel was both the frosted panel and the scroll container in one
+   element, so the sticky heading could never reach the panel's true top.
+   #30 splits the header out into its own non-scrolling element instead (see
+   .floating-panel--network__body below); the original sticky-anchor reason
+   for zeroing this padding is gone, but the arrangement itself still holds
+   for a simpler one — .panel-header now carries its own inset independently
+   (via .panel-header--static, not this padding), same as .site-filter and
+   .site-cards already do below. */
 .floating-panel--network {
   flex: 1 1 auto;
   min-height: 0;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   padding: 0;
+}
+
+/* The actual scroll region: everything below the static header. Owns the
+   scrollbar styling (#14/#25, below) now that it — not the panel — is the
+   scrolling element. */
+.floating-panel--network__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .floating-panel--sim {
@@ -1628,7 +1646,7 @@
     max-height: none;
     pointer-events: auto;
   }
-  .floating-panel--network {
+  .floating-panel--network__body {
     overflow: visible;
   }
 }
