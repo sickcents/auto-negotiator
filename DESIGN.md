@@ -384,6 +384,16 @@ The rail's width is a two-state toggle, not drag-to-resize — the readability c
 - Below the `1023px` breakpoint the pane is already full-width (`width: auto` in the stacked mobile layout), so the toggle button is hidden there — expanding has nothing to do.
 - The map and side rail are unaffected by the rail's width change (both are independently `position: absolute`), so nothing needs to reflow when the pane expands.
 
+### Circumstance-only detail controls (#17)
+
+`Manager Reply Injection` (`#manager-reply-block`) and `Regional Director Override` (`#regional-override-block`) are **not** permanent fixtures of the timeline strip — each is a hidden-by-default block (native `hidden` attribute, toggled from `renderTransferDetail` in `public/js/components/transferDetail.js`) that only appears when the selected transfer's status calls for that specific human input:
+
+- Manager Reply Injection shows only when `status === 'awaiting_reply'`.
+- Regional Director Override shows only when `status === 'deadlock'`.
+- With no transfer selected, or any other status, neither block is shown.
+
+Anything added to the timeline strip that represents a one-off human action tied to a specific transfer state should follow this pattern (hidden fixture + status-driven `hidden` toggle) rather than rendering unconditionally.
+
 ## 11. App-Specific: Ops Map Tonal Filter (#15)
 
 The Ops Map recolors OSM's fully-saturated tiles to a monotone plate by filtering only the Leaflet tile pane (`.map--ink .leaflet-tile-pane`); markers, route lines, tooltips, and the zoom control live in sibling panes and keep their own color. The recipe is seven named tokens in `public/styles/tokens.css`, composed in one `filter` rule in `components.css`:
