@@ -1,4 +1,4 @@
-import { statusMeta } from "../format.js";
+import { statusMeta, transferSummary } from "../format.js";
 
 export function renderTransferList(transfers, { selectedTransferId, onSelect }) {
   const container = document.getElementById("transfer-list");
@@ -12,7 +12,7 @@ export function renderTransferList(transfers, { selectedTransferId, onSelect }) 
       const meta = statusMeta(t.status);
       const selected = t.id === selectedTransferId ? "is-selected" : "";
       return `<div class="transfer-row ${selected}" data-id="${t.id}">
-        <span>#${t.id} · ${t.receiverSiteId} needs ${t.quantity}x ${t.hardwareType}${t.donorSiteId ? ` from ${t.donorSiteId}` : ""}</span>
+        <span>#${t.id} · ${transferSummary(t)}</span>
         <span class="status-pill status-pill--${meta.tone}">${meta.label}</span>
       </div>`;
     })

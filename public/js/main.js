@@ -6,7 +6,7 @@ import { renderNetworkStatus, initSiteFilter, initSiteCardSelection } from "./co
 import { renderMap, initMapTooltip, panToSite } from "./components/mapView.js";
 import { populateSimSiteOptions, initSimulationControls } from "./components/simulationControls.js";
 import { renderTransferList } from "./components/transferList.js";
-import { markTransferSelected, renderTransferDetail } from "./components/transferDetail.js";
+import { markTransferSelected, renderTransferDetail, initDetailHeader } from "./components/transferDetail.js";
 import { initConsoleCopy } from "./components/agentConsole.js";
 import { initManagerReply } from "./components/managerReply.js";
 import { initTransfersPaneResize } from "./components/transfersPane.js";
@@ -61,7 +61,8 @@ function selectTransfer(id) {
   if (id === state.selectedTransferId) return; // already viewing it, poll loop already running
 
   state.selectedTransferId = id;
-  markTransferSelected(id);
+  const transfer = state.transfers.find((t) => t.id === id);
+  markTransferSelected(id, transfer);
   renderTransferList(state.transfers, { selectedTransferId: id, onSelect: selectTransfer });
   renderMap(state.sites, state.transfers, id, state.siteTypeFilter, state.selectedSiteId);
 
@@ -70,7 +71,6 @@ function selectTransfer(id) {
   // A Transfer that's waiting on a human is just being *viewed* — firing
   // /step for it would be a guaranteed no-op round-trip (#9). The poll loop
   // only starts when the agent actually has autonomous turns left to run.
-  const transfer = state.transfers.find((t) => t.id === id);
   if (transfer && WAITING_ON_HUMAN_STATUSES.has(transfer.status)) {
     stopPolling();
   } else {
@@ -178,6 +178,7 @@ function announceDispatch(transferId, toolResult) {
 initMapTooltip();
 initNavHeightTracking();
 initConsoleCopy();
+initDetailHeader();
 initTransfersPaneResize();
 initSiteFilter({
   onChange: (activeTypes) => {

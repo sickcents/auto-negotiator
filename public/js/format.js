@@ -20,6 +20,13 @@ export function statusMeta(status) {
   return STATUS_META[status] ?? { label: status, tone: "neutral" };
 }
 
+// Shared one-line description of a Transfer — the Transfer Detail header
+// (#29) reuses this verbatim so it reads as the same row expanded, not a
+// second, differently-worded description of the same transfer.
+export function transferSummary(t) {
+  return `${t.receiverSiteId} needs ${t.quantity}x ${t.hardwareType}${t.donorSiteId ? ` from ${t.donorSiteId}` : ""}`;
+}
+
 // Statuses where a Transfer still has an open donor route worth drawing on the map.
 export const ACTIVE_ROUTE_STATUSES = new Set([
   "sourcing",
