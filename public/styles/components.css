@@ -172,33 +172,45 @@
      scrolled content, so it stays put no matter how either region scrolls. */
   border-bottom: 1px solid var(--color-border);
   padding-bottom: var(--space-2);
+  /* Gutter (#25) — rows had no right-side padding of their own, so they ran
+     flush against the scrollbar thumb. */
+  padding-right: var(--space-2);
 }
 
 .transfers-strip__timeline {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  /* Gutter (#25) — matches .transfers-strip__list so the timeline entries
+     don't sit flush against the scrollbar thumb either. */
+  padding-right: var(--space-2);
 }
 
 /* One scrollbar per logical region (#14): thin, ink-toned, cross-browser via
    plain CSS (scrollbar-width/-color + the -webkit- pseudo-elements) rather
-   than a dependency — two properties cover every evergreen browser. */
+   than a dependency — two properties cover every evergreen browser. Also
+   applied to .floating-panel--network (#25) so the Network Status panel's
+   scroll region matches instead of falling back to the OS default. */
 .transfers-strip__list,
-.transfers-strip__timeline {
+.transfers-strip__timeline,
+.floating-panel--network {
   scrollbar-width: thin;
   scrollbar-color: rgba(20, 20, 19, 0.22) transparent;
 }
 .transfers-strip__list::-webkit-scrollbar,
-.transfers-strip__timeline::-webkit-scrollbar {
+.transfers-strip__timeline::-webkit-scrollbar,
+.floating-panel--network::-webkit-scrollbar {
   width: 6px;
 }
 .transfers-strip__list::-webkit-scrollbar-thumb,
-.transfers-strip__timeline::-webkit-scrollbar-thumb {
+.transfers-strip__timeline::-webkit-scrollbar-thumb,
+.floating-panel--network::-webkit-scrollbar-thumb {
   background: rgba(20, 20, 19, 0.22);
   border-radius: var(--radius-pill);
 }
 .transfers-strip__list::-webkit-scrollbar-track,
-.transfers-strip__timeline::-webkit-scrollbar-track {
+.transfers-strip__timeline::-webkit-scrollbar-track,
+.floating-panel--network::-webkit-scrollbar-track {
   background: transparent;
 }
 
