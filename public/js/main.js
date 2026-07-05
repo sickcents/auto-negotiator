@@ -11,7 +11,7 @@ import { initConsoleCopy } from "./components/agentConsole.js";
 import { initManagerReply } from "./components/managerReply.js";
 import { initTransfersPaneExpand } from "./components/transfersPane.js";
 import { populateOverrideDonorOptions, initRegionalOverride } from "./components/regionalOverride.js";
-import { renderNavStatus } from "./components/nav.js";
+import { renderNavStatus, initNavHeightTracking } from "./components/nav.js";
 import { showToast } from "./components/toast.js";
 import { icon } from "./icons.js";
 import { escapeHtml } from "./markdown.js";
@@ -176,6 +176,7 @@ function announceDispatch(transferId, toolResult) {
 }
 
 initMapTooltip();
+initNavHeightTracking();
 initConsoleCopy();
 initTransfersPaneExpand();
 initSiteFilter({

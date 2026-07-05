@@ -82,6 +82,13 @@
   --shadow-1: rgba(0, 0, 0, 0.04) 0px 4px 24px 0px;
   --shadow-2: rgba(0, 0, 0, 0.08) 0px 24px 48px 0px;
 
+  /* --- Header height (#21) -----------------------------------------------
+     Set from real layout (ResizeObserver in public/js/components/nav.js),
+     not a hardcoded magic number — this fallback only covers the instant
+     before that first measurement lands. Panels pinned below the header
+     read this instead of guessing its height. */
+  --nav-height: 64px;
+
   /* --- Left pane width (#16) --------------------------------------------- */
   --transfers-strip-width: clamp(340px, 27vw, 420px); /* normal */
   --transfers-strip-width-expanded: clamp(480px, 38vw, 640px); /* reading mode */

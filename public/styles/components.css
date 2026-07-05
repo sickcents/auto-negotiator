@@ -19,21 +19,28 @@
   pointer-events: auto;
 }
 
-/* --- Floating nav pill (top-left) ----------------------------------------- */
-
+/* --- Header bar (#21) -------------------------------------------------
+   A deliberate deviation from DESIGN.md's documented floating-pill nav
+   pattern (Section 1/7) — see DESIGN.md's App-Specific header section for
+   the rationale. Spans the full viewport width and docks flush at the top
+   instead of floating as a content-sized pill; its rendered height is
+   tracked into --nav-height (public/js/components/nav.js) so panels
+   pinned below it (.transfers-strip, .side-rail) clear it exactly instead
+   of guessing with a fixed pixel offset. */
 .nav-pill {
   position: absolute;
-  top: var(--space-3);
-  left: var(--space-3);
+  top: 0;
+  left: 0;
+  right: 0;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-3);
-  padding: 10px 20px 10px 14px;
+  padding: var(--space-2) var(--space-3);
   background: var(--color-glass);
   -webkit-backdrop-filter: blur(14px) saturate(1.2);
   backdrop-filter: blur(14px) saturate(1.2);
-  border: 1px solid var(--color-glass-border);
-  border-radius: var(--radius-pill);
+  border-bottom: 1px solid var(--color-glass-border);
   box-shadow: var(--shadow-2);
 }
 
@@ -97,7 +104,7 @@
 .transfers-strip {
   position: absolute;
   left: var(--space-3);
-  top: 84px; /* clears the nav pill above it */
+  top: calc(var(--nav-height) + var(--space-3)); /* clears the header bar above it (#21) */
   bottom: var(--space-3);
   width: var(--transfers-strip-width);
   display: flex;
@@ -194,10 +201,10 @@
 
 .side-rail {
   position: absolute;
-  top: var(--space-3);
+  top: calc(var(--nav-height) + var(--space-3)); /* clears the header bar above it (#21) */
   right: var(--space-3);
   width: clamp(300px, 23vw, 360px);
-  max-height: calc(100vh - var(--space-3) - 100px);
+  max-height: calc(100vh - var(--nav-height) - var(--space-3) - 100px);
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -1465,9 +1472,11 @@
   .site-cards {
     grid-template-columns: 1fr;
   }
+  /* Full-width bar (#21), not the pill shape — stack brand above status
+     instead of squeezing both into one row at this width. */
   .nav-pill {
-    border-radius: var(--radius-stadium);
     align-items: flex-start;
     flex-direction: column;
+    gap: var(--space-2);
   }
 }
