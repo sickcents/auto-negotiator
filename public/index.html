@@ -21,6 +21,35 @@
   ></script>
 </head>
 <body>
+  <!--
+    Layout is now two stacked layers, not a page of stacked cards (#12):
+
+      MapStage  — fixed, inset:0, z:0. The ink-toned OSM map fills the whole
+                  viewport as the background plate. `.map--ink` drives the
+                  monochrome tile recolor (see components.css).
+      AppShell  — fixed, inset:0, z:10, pointer-events:none. A transparent
+                  overlay whose panels (pointer-events:auto) float above the
+                  live map; the map stays draggable in the gaps between them.
+
+    Component hierarchy (mirrored 1:1 by public/js/components/*):
+      ├── Nav                     (live counts pill — top-left)
+      ├── TransfersStrip          (left rail)
+      │   ├── TransfersPanel          → TransferRow × N
+      │   └── AgentTimeline           → grouped by negotiation state
+      │       ├── ManagerReplyPanel
+      │       └── RegionalOverridePanel
+      ├── MapPanel                (full-bleed background → SiteMarker × N,
+      │                            RouteArc × active transfers)
+      └── SideRail                (right rail)
+          ├── NetworkStatusPanel      → SiteCard × N
+          └── SimulationControlsPanel
+  -->
+  <section class="map-stage" aria-label="Ops Map — Eastern Singapore">
+    <div class="map-frame" id="map-frame">
+      <div id="map" class="map map--ink" role="img" aria-label="Map of ClickShop sites across Eastern Singapore"></div>
+    </div>
+  </section>
+
   <div class="app-shell">
     <header class="nav-pill">
       <div class="nav-pill__brand">
@@ -33,21 +62,6 @@
       <p class="nav-pill__status" id="nav-status">Loading network…</p>
     </header>
 
-    <!--
-      Component hierarchy (mirrored 1:1 by public/js/components/*):
-        AppShell
-        ├── Nav                     (live counts pill)
-        ├── TransfersStrip          (always-visible, sits above MapStage)
-        │   ├── TransfersPanel          → TransferRow × N
-        │   └── AgentTimeline           → grouped by negotiation state
-        │       ├── ManagerReplyPanel
-        │       └── RegionalOverridePanel
-        └── MapStage                (full-bleed hero — map-heading is visually
-                                      implicit; the map itself is the panel)
-            ├── MapPanel                → SiteMarker × N, RouteArc × active transfers
-            ├── NetworkStatusPanel      → SiteCard × N        (floats, left edge)
-            └── SimulationControlsPanel                       (floats, right third)
-    -->
     <main class="panel transfers-strip" aria-label="Transfers">
       <div class="transfers-strip__list">
         <h2 class="eyebrow" id="transfers-heading">Transfers</h2>
@@ -95,11 +109,7 @@
       </div>
     </main>
 
-    <section class="map-stage" aria-label="Ops Map — Eastern Singapore">
-      <div class="map-frame" id="map-frame">
-        <div id="map" class="map" role="img" aria-label="Map of ClickShop sites across Eastern Singapore"></div>
-      </div>
-
+    <aside class="side-rail" aria-label="Network controls">
       <section class="panel floating-panel floating-panel--network" aria-labelledby="network-heading">
         <h2 class="eyebrow" id="network-heading">Network Status</h2>
         <div class="site-filter" id="site-filter" role="group" aria-label="Filter by site type">
@@ -124,7 +134,7 @@
         </div>
         <p id="sim-result" class="hint"></p>
       </section>
-    </section>
+    </aside>
   </div>
 
   <script type="module" src="/js/main.js"></script>
