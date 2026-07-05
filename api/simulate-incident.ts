@@ -1,11 +1,12 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { setStock } from "../lib/domain/siteRepo.js";
 import { checkThresholdsAndMaybeCreateTransfer } from "../lib/domain/monitor.js";
+import { withErrorHandling } from "../lib/http.js";
 
 // POST /api/simulate-incident — PRD Section 7 "Simulate Incident" control.
 // Drops a site's stock below its operating_threshold, then runs the same
 // inline threshold check any real mutation would (ADR-0002/PRD Section 4).
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default withErrorHandling(async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   const { siteId, hardwareType, dropTo } = req.body ?? {};
@@ -18,4 +19,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const transfer = await checkThresholdsAndMaybeCreateTransfer(siteId, hardwareType);
   res.status(200).json({ transfer });
-}
+});

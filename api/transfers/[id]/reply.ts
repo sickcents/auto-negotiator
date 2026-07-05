@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { getTransfer, addManagerMessage, setTransferStatus } from "../../../lib/domain/transferRepo.js";
+import { withErrorHandling } from "../../../lib/http.js";
 
 // POST /api/transfers/:id/reply — Manager Reply Injection (design-session
 // Q2): body is either free text or a preset string; both go through this
@@ -12,7 +13,7 @@ import { getTransfer, addManagerMessage, setTransferStatus } from "../../../lib/
 // hasSentFirmnessLock/recordFirmnessPushback). Guessing here from status
 // alone previously deadlocked Transfers on an *agreeing* reply just
 // because one had arrived while status was "locked".
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default withErrorHandling(async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   const id = Number(req.query.id);
@@ -38,4 +39,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   await setTransferStatus(id, "sourcing"); // give the agent a turn to interpret this reply
 
   res.status(200).json({ status: "sourcing" });
-}
+});

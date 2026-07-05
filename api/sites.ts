@@ -1,25 +1,25 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getAllSites, getTrailingDepletion } from "../lib/domain/siteRepo.js";
+import { getAllSites, getAllTrailingDepletion } from "../lib/domain/siteRepo.js";
 import { computeMinBuffer, computeDepletionRate } from "../lib/domain/thresholds.js";
+import { withErrorHandling } from "../lib/http.js";
 
 // GET /api/sites — backs the Map View + Network Status View (PRD Section 7).
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default withErrorHandling(async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
 
   const sites = await getAllSites();
-  const withThresholds = await Promise.all(
-    sites.map(async (site) => {
-      const scannerHistory = await getTrailingDepletion(site.id, "scanner");
-      const printerHistory = await getTrailingDepletion(site.id, "printer");
-      return {
-        ...site,
-        scannerMinBuffer: computeMinBuffer(scannerHistory),
-        scannerDepletionRate: computeDepletionRate(scannerHistory),
-        printerMinBuffer: computeMinBuffer(printerHistory),
-        printerDepletionRate: computeDepletionRate(printerHistory),
-      };
-    })
-  );
+  const depletionBySite = await getAllTrailingDepletion();
+
+  const withThresholds = sites.map((site) => {
+    const history = depletionBySite.get(site.id) ?? { scanner: [], printer: [] };
+    return {
+      ...site,
+      scannerMinBuffer: computeMinBuffer(history.scanner),
+      scannerDepletionRate: computeDepletionRate(history.scanner),
+      printerMinBuffer: computeMinBuffer(history.printer),
+      printerDepletionRate: computeDepletionRate(history.printer),
+    };
+  });
 
   res.status(200).json({ sites: withThresholds });
-}
+});

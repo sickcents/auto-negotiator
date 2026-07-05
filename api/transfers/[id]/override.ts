@@ -1,10 +1,11 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { resolveOverride } from "../../../lib/domain/regionalOverride.js";
+import { withErrorHandling } from "../../../lib/http.js";
 
 // POST /api/transfers/:id/override — Regional Director Override (PRD
 // Section 6/7, design-session Q11/Q12-followup). body: { action: "approve" }
 // or { action: "reroute", donorSiteId }.
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default withErrorHandling(async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   const id = Number(req.query.id);
@@ -23,4 +24,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     action === "approve" ? { type: "approve" } : { type: "reroute", donorSiteId }
   );
   res.status(200).json(result);
-}
+});

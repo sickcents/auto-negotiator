@@ -61,6 +61,33 @@ export async function getTrailingDepletion(
   return rows.map((r: any) => r.depleted as number);
 }
 
+// One query for every site's trailing depletion, instead of one round-trip
+// per site per hardware type — api/sites.ts previously fired up to 2N
+// concurrent Neon HTTP requests for N sites, which was overrunning Neon's
+// connection handling and intermittently timing out under load.
+export async function getAllTrailingDepletion(
+  days = 7
+): Promise<Map<string, Record<HardwareType, number[]>>> {
+  const rows = await sql(
+    `SELECT site_id, hardware_type, depleted FROM (
+       SELECT site_id, hardware_type, depleted,
+              ROW_NUMBER() OVER (PARTITION BY site_id, hardware_type ORDER BY day DESC) AS rn
+       FROM depletion_log
+     ) ranked
+     WHERE rn <= $1`,
+    [days]
+  );
+
+  const bySite = new Map<string, Record<HardwareType, number[]>>();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  for (const row of rows as any[]) {
+    const entry = bySite.get(row.site_id) ?? { scanner: [], printer: [] };
+    entry[row.hardware_type as HardwareType].push(row.depleted as number);
+    bySite.set(row.site_id, entry);
+  }
+  return bySite;
+}
+
 export async function adjustStock(
   siteId: string,
   hardwareType: HardwareType,
