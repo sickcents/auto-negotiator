@@ -3,3 +3,22 @@
 [3] Dashboard shell overhaul: full-bleed map, sidebar, floating panel - DONE
 [4] Filterable site sidebar (S/M/L/XL) - DONE
 [5] Transfers dashboard as a vertical step-timeline - DONE
+[6] Fix invalid default Gemini model id blocking live LLM calls - DONE
+[7] Add a working, documented local dev path - DONE
+[8] Adopt Phosphor icon set (self-hosted inline SVGs) - DONE
+[9] Stop redundant /step calls and make agent turns idempotent - DONE
+[10] Agent Console: structured, single-execution turn rendering - DONE
+[11] Site Type badge: plain pill, no brackets - DONE
+[12] Full-bleed, ink-toned monotone map background - DONE
+[13] Map: visualize projected & completed asset transfers - DONE
+[14] Fix nested double-scrollbar and add visual separation in left pane - PENDING
+[15] Map: replace tile-filter palette with a more comforting monotone scheme - PENDING
+[16] Make left pane expandable to improve readability - PENDING
+[17] Manager Reply Injection and Regional Director Override should be circumstance-only, not permanent fixtures - PENDING
+[18] Network status: color-coded threshold/buffer gauge markers with rich hover - PENDING
+[19] Clicking a site card highlights its position on the map - PENDING
+[20] Completed transfers show a persistent route indicator on the map - PENDING
+[21] Header should span full page width with correct spacing above the panel below - PENDING
+[22] Agent Timeline: use 8px border-radius instead of stadium radius - PENDING
+[23] Sticky headers on each scrollable panel - PENDING
+[24] Shop icons on the map should follow the design system's colors - PENDING
