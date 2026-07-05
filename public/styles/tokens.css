@@ -94,9 +94,8 @@
      read this instead of guessing its height. */
   --nav-height: 64px;
 
-  /* --- Left pane width (#16) --------------------------------------------- */
-  --transfers-strip-width: clamp(340px, 27vw, 420px); /* normal */
-  --transfers-strip-width-expanded: clamp(480px, 38vw, 640px); /* reading mode */
+  /* --- Left pane width (#16, drag-resizable per #26) ---------------------- */
+  --transfers-strip-width: clamp(340px, 27vw, 420px); /* default until dragged */
 
   /* --- Space (8px scale) ------------------------------------------------ */
   --space-1: 8px;

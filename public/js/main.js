@@ -9,7 +9,7 @@ import { renderTransferList } from "./components/transferList.js";
 import { markTransferSelected, renderTransferDetail } from "./components/transferDetail.js";
 import { initConsoleCopy } from "./components/agentConsole.js";
 import { initManagerReply } from "./components/managerReply.js";
-import { initTransfersPaneExpand } from "./components/transfersPane.js";
+import { initTransfersPaneResize } from "./components/transfersPane.js";
 import { populateOverrideDonorOptions, initRegionalOverride } from "./components/regionalOverride.js";
 import { renderNavStatus, initNavHeightTracking } from "./components/nav.js";
 import { showToast } from "./components/toast.js";
@@ -178,7 +178,7 @@ function announceDispatch(transferId, toolResult) {
 initMapTooltip();
 initNavHeightTracking();
 initConsoleCopy();
-initTransfersPaneExpand();
+initTransfersPaneResize();
 initSiteFilter({
   onChange: (activeTypes) => {
     state.siteTypeFilter = activeTypes;
