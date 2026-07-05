@@ -19,6 +19,6 @@
 [19] Clicking a site card highlights its position on the map - DONE
 [20] Completed transfers show a persistent route indicator on the map - DONE
 [21] Header should span full page width with correct spacing above the panel below - DONE
-[22] Agent Timeline: use 8px border-radius instead of stadium radius - PENDING
+[22] Agent Timeline: use 8px border-radius instead of stadium radius - DONE
 [23] Sticky headers on each scrollable panel - PENDING
 [24] Shop icons on the map should follow the design system's colors - PENDING
