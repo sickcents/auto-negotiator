@@ -950,7 +950,7 @@
 
 .console-frame {
   background: var(--color-ink);
-  border-radius: var(--radius-stadium);
+  border-radius: var(--radius-frame); /* explicit exception (#22) — see tokens.css */
   padding: var(--space-2) var(--space-3) var(--space-3);
   box-shadow: var(--shadow-2);
 }
