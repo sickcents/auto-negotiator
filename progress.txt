@@ -15,7 +15,7 @@
 [15] Map: replace tile-filter palette with a more comforting monotone scheme - DONE
 [16] Make left pane expandable to improve readability - DONE
 [17] Manager Reply Injection and Regional Director Override should be circumstance-only, not permanent fixtures - DONE
-[18] Network status: color-coded threshold/buffer gauge markers with rich hover - PENDING
+[18] Network status: color-coded threshold/buffer gauge markers with rich hover - DONE
 [19] Clicking a site card highlights its position on the map - PENDING
 [20] Completed transfers show a persistent route indicator on the map - PENDING
 [21] Header should span full page width with correct spacing above the panel below - PENDING
