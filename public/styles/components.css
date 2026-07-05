@@ -84,7 +84,11 @@
 
 /* Frosted panel — the shared overlay surface. Every panel now sits over live
    map tiles, so it needs its own translucent-cream plate + blur to stay
-   legible instead of resting on the (now hidden) opaque canvas. */
+   legible instead of resting on the (now hidden) opaque canvas.
+   `overflow: hidden` clips every child — headers included — to this rounded
+   shape; without it a sticky header's square corners visibly overhang past
+   the panel's own rounded ones (a design bug found live, since nothing was
+   otherwise clipping child boxes to the curve). */
 .panel {
   background: var(--color-glass);
   -webkit-backdrop-filter: blur(14px) saturate(1.2);
@@ -93,16 +97,16 @@
   border-radius: var(--radius-button);
   padding: var(--space-3);
   box-shadow: var(--shadow-2);
+  overflow: hidden;
 }
 
 /* ==========================================================================
    Shared panel header (#27) — one pattern for every panel's heading row:
    Transfers list, Transfer Detail, the Agent Timeline console frame,
    Network Status, and Simulate Incident all use this instead of five
-   ad-hoc, copy-pasted variants. Eyebrow typography, sticky-to-panel-top
-   with a blurred background so scrolled content never shows through, and a
-   bottom-border separator so a header always reads as "the top of this
-   panel" rather than floating text. Documented in DESIGN.md.
+   ad-hoc, copy-pasted variants. Eyebrow typography, sticky-to-panel-top,
+   and a bottom-border separator so a header always reads as "the top of
+   this panel" rather than floating text. Documented in DESIGN.md.
    ========================================================================== */
 .panel-header {
   position: sticky;
@@ -113,9 +117,15 @@
   gap: var(--space-2);
   padding: var(--space-3) var(--space-3) var(--space-2);
   border-bottom: 1px solid var(--color-border);
-  background: var(--color-glass);
-  -webkit-backdrop-filter: blur(14px) saturate(1.2);
-  backdrop-filter: blur(14px) saturate(1.2);
+  /* Opaque, not another layer of .panel's own translucent --color-glass:
+     stacking two blurred, semi-transparent glass layers compounds their
+     opacity, so the header rendered visibly whiter than the rest of the
+     panel below it (a design bug found live). --color-canvas-lifted is
+     the same Lifted Cream hue at full opacity — the token's own comment
+     ("nested/raised panels") is exactly this case: a header raised above
+     the scrolled content inside a translucent panel, not a second sheet
+     of the same glass. */
+  background: var(--color-canvas-lifted);
 }
 .panel-header.eyebrow {
   /* .eyebrow's own bottom margin is for stand-alone labels; inside the
