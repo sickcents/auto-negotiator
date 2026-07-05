@@ -82,6 +82,10 @@
   --shadow-1: rgba(0, 0, 0, 0.04) 0px 4px 24px 0px;
   --shadow-2: rgba(0, 0, 0, 0.08) 0px 24px 48px 0px;
 
+  /* --- Left pane width (#16) --------------------------------------------- */
+  --transfers-strip-width: clamp(340px, 27vw, 420px); /* normal */
+  --transfers-strip-width-expanded: clamp(480px, 38vw, 640px); /* reading mode */
+
   /* --- Space (8px scale) ------------------------------------------------ */
   --space-1: 8px;
   --space-2: 16px;

@@ -373,6 +373,17 @@ Rules for anything added to this rail going forward:
 - **The boundary between regions is a static border, not a gap.** `.transfers-strip__list` carries `border-bottom: 1px solid var(--color-border)`, matching the system-wide preference for border lines over shadows for functional delineation (Section 6). Because the border lives on the box itself rather than on scrolled content, it stays visible regardless of scroll position in either region.
 - **Scrollbars are plain CSS, no dependency.** `scrollbar-width/-color` (Firefox) plus `::-webkit-scrollbar*` (Chromium/Safari) give a thin, ink-toned (`rgba(20, 20, 19, 0.22)`) scrollbar affordance consistent across evergreen browsers. A scrollbar-styling library was considered and rejected — two CSS properties already cover the target browsers, so a dependency would add weight without adding capability.
 
+### Expandable width (#16)
+
+The rail's width is a two-state toggle, not drag-to-resize — the readability complaint didn't call for arbitrary widths, just a wider "reading mode":
+
+- **`--transfers-strip-width`** (`clamp(340px, 27vw, 420px)`) — the normal width.
+- **`--transfers-strip-width-expanded`** (`clamp(480px, 38vw, 640px)`) — applied via the `.transfers-strip--expanded` class, toggled by the caret button (`#pane-expand-toggle`) in the transfer list header (`public/js/components/transfersPane.js`).
+- The choice persists in `localStorage` (`an.transfersPaneExpanded`) and is re-applied on load.
+- The toggle reuses the same caret icon + 180deg-rotate-on-state convention already used by `.timeline-group__caret`, rather than adding a new icon asset.
+- Below the `1023px` breakpoint the pane is already full-width (`width: auto` in the stacked mobile layout), so the toggle button is hidden there — expanding has nothing to do.
+- The map and side rail are unaffected by the rail's width change (both are independently `position: absolute`), so nothing needs to reflow when the pane expands.
+
 ## 11. App-Specific: Ops Map Tonal Filter (#15)
 
 The Ops Map recolors OSM's fully-saturated tiles to a monotone plate by filtering only the Leaflet tile pane (`.map--ink .leaflet-tile-pane`); markers, route lines, tooltips, and the zoom control live in sibling panes and keep their own color. The recipe is seven named tokens in `public/styles/tokens.css`, composed in one `filter` rule in `components.css`:
