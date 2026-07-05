@@ -63,10 +63,17 @@
     </header>
 
     <main class="panel transfers-strip" aria-label="Transfers">
+      <div
+        id="transfers-pane-resize-handle"
+        class="transfers-strip__resize-handle"
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Resize transfers panel"
+        tabindex="0"
+      ></div>
       <div class="transfers-strip__list">
         <div class="transfers-strip__list-header">
           <h2 class="eyebrow" id="transfers-heading">Transfers</h2>
-          <button id="pane-expand-toggle" class="pane-expand-toggle" type="button" aria-expanded="false" aria-controls="transfer-list transfer-detail" title="Expand pane for easier reading"></button>
         </div>
         <div id="transfer-list" class="transfer-list"></div>
       </div>

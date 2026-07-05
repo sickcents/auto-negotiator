@@ -111,13 +111,44 @@
   flex-direction: column;
   gap: var(--space-3);
   overflow: hidden;
-  transition: width 200ms ease;
 }
 
-/* Reading-mode toggle (#16) — a two-state width, not drag-to-resize, since
-   the complaint was readability rather than needing an arbitrary width. */
-.transfers-strip--expanded {
-  width: var(--transfers-strip-width-expanded);
+/* Continuous drag-to-resize handle (#26) — replaces the #16 two-state
+   expand toggle. The element itself is a wide (12px) invisible hit area on
+   the panel's right edge; ::after draws the thin visible grip line that
+   only appears on hover/focus/drag so it doesn't clutter the panel. */
+.transfers-strip__resize-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: -6px;
+  width: 12px;
+  cursor: ew-resize;
+  touch-action: none;
+  z-index: 3;
+}
+.transfers-strip__resize-handle::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  transition: background 120ms ease;
+}
+.transfers-strip__resize-handle:hover::after,
+.transfers-strip__resize-handle:focus-visible::after,
+.transfers-strip--resizing .transfers-strip__resize-handle::after {
+  background: rgba(20, 20, 19, 0.22);
+}
+.transfers-strip__resize-handle:focus-visible {
+  outline: none;
+}
+.transfers-strip--resizing {
+  user-select: none;
 }
 
 /* Sticky panel heading (#23) — .transfers-strip__list has no padding of
@@ -135,33 +166,6 @@
   background: var(--color-glass);
   -webkit-backdrop-filter: blur(14px) saturate(1.2);
   backdrop-filter: blur(14px) saturate(1.2);
-}
-
-.pane-expand-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  flex: none;
-  border-radius: 50%;
-  border: 1px solid var(--color-border);
-  background: transparent;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  transition: transform 200ms ease, background 100ms ease, color 100ms ease;
-}
-.pane-expand-toggle:hover {
-  background: var(--color-canvas);
-  color: var(--color-text-charcoal);
-}
-.pane-expand-toggle__icon {
-  width: 12px;
-  height: 12px;
-  transition: transform 200ms ease;
-}
-.transfers-strip--expanded .pane-expand-toggle__icon {
-  transform: rotate(180deg);
 }
 
 .transfers-strip__list {
@@ -1523,17 +1527,16 @@
     position: static;
   }
 
-  .transfers-strip,
-  .transfers-strip--expanded {
+  .transfers-strip {
     position: static;
-    width: auto;
+    width: auto !important; /* overrides the drag-resize inline style (#26) */
     top: auto;
     bottom: auto;
     overflow: visible;
   }
   /* The pane is already full-width in the stacked mobile/tablet layout, so
-     the reading-width toggle has nothing to do (#16). */
-  .pane-expand-toggle {
+     the resize handle has nothing to do (#16, #26). */
+  .transfers-strip__resize-handle {
     display: none;
   }
   .transfers-strip__list {
