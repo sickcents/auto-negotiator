@@ -13,7 +13,7 @@
 [13] Map: visualize projected & completed asset transfers - DONE
 [14] Fix nested double-scrollbar and add visual separation in left pane - DONE
 [15] Map: replace tile-filter palette with a more comforting monotone scheme - DONE
-[16] Make left pane expandable to improve readability - PENDING
+[16] Make left pane expandable to improve readability - DONE
 [17] Manager Reply Injection and Regional Director Override should be circumstance-only, not permanent fixtures - PENDING
 [18] Network status: color-coded threshold/buffer gauge markers with rich hover - PENDING
 [19] Clicking a site card highlights its position on the map - PENDING
