@@ -51,9 +51,21 @@
   --color-glass-border: rgba(255, 255, 255, 0.5); /* soft top-highlight edge */
   --color-glass-ink: rgba(20, 20, 19, 0.66); /* Ink glass — map controls over tiles */
 
-  /* --- Ops-map palette --------------------------------------------------- */
-  --color-map-base: #141413; /* Ink backdrop shown before/around tiles */
+  /* --- Ops-map palette (#15 — softer, warmer "comforting" monotone than
+     the original stark high-contrast ink) --------------------------------- */
+  --color-map-base: #221d19; /* Warm Charcoal — lighter/warmer than Ink Black so the void behind tiles doesn't read pitch-black */
   --color-marker: #f3f0ee; /* single light ink-tint used by every site pin */
+
+  /* Ink-toned monochrome tile recolor, split into named tokens (#15) so the
+     recipe lives in one place instead of a one-off filter string. Applied
+     together in components.css as filter: grayscale() invert() etc. */
+  --map-tile-grayscale: 1; /* strip all OSM cartographic hue → neutral greys */
+  --map-tile-invert: 0.9; /* flip luminance (dark land / light roads), pulled back from a full 1 so the flip isn't a harsh stark negative */
+  --map-tile-brightness: 0.9; /* was 0.82 — sits the plate closer to Warm Charcoal instead of sinking toward black */
+  --map-tile-contrast: 0.78; /* was 0.9 — softens inverted edges into a hazier, less stark plate */
+  --map-tile-sepia: 0.45; /* was 0.35 — more warmth re-added after grayscale/invert */
+  --map-tile-hue-rotate: -8deg; /* was -12deg — a gentler pull, keeps the warm end of the rotation instead of drifting toward slate */
+  --map-tile-saturate: 0.55; /* was 0.6 — kept low; still tonal/monotone, not a multi-color scheme */
 
   /* --- Type -------------------------------------------------------------- */
   --font-display: "Sofia Sans", "Inter", "Segoe UI", Arial, sans-serif;

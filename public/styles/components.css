@@ -408,15 +408,14 @@
    OSM ships warm, fully-saturated cartography (green parks, blue water,
    cream land). To fold it down to a dark near-monochrome that sits *under*
    the Ink UI, we filter ONLY the Leaflet tile pane — markers, route SVGs,
-   tooltips and the zoom control live in sibling panes and keep their color:
-     grayscale(1)   strip all cartographic hue          → neutral greys
-     invert(1)      flip luminance                       → dark land, light roads/labels
-     brightness(.82) sink the whole plate toward ink
-     contrast(.9)   soften the harsh inverted edges
-     sepia(.35) + hue-rotate(-12deg) + saturate(.6)      re-warm the greys a
-                    touch toward the warm Ink (#141413) tone, not a cold slate */
+   tooltips and the zoom control live in sibling panes and keep their color.
+   Each filter stage is a named token in tokens.css (#15) — see there for
+   what each value does and why; this rule just composes them. */
 .map--ink .leaflet-tile-pane {
-  filter: grayscale(1) invert(1) brightness(0.82) contrast(0.9) sepia(0.35) hue-rotate(-12deg) saturate(0.6);
+  filter: grayscale(var(--map-tile-grayscale)) invert(var(--map-tile-invert))
+    brightness(var(--map-tile-brightness)) contrast(var(--map-tile-contrast))
+    sepia(var(--map-tile-sepia)) hue-rotate(var(--map-tile-hue-rotate))
+    saturate(var(--map-tile-saturate));
 }
 
 /* Leaflet controls over the ink base: frost them to match the panels and

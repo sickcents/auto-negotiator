@@ -47,6 +47,9 @@ Typography is rendered entirely in **MarkForMC**, Mastercard's proprietary geome
 - **Link Blue** (`#3860BE`): A deep, slightly dusty blue used for inline links and informational callouts. Saturated enough to read as a link without being neon.
 - **Priceless Red + Yellow**: The full-color Mastercard logo mark is the only place the brand's red and yellow appear together; they lock the identity to the page without acting as a UI palette.
 
+### App-Specific: Ops Map Base (#15)
+- **Warm Charcoal** (`#221D19`): The Ops Map's backdrop void (`--color-map-base`), shown before/around tiles. Replaced Ink Black (`#141413`) here specifically — a hair lighter and warmer so the full-bleed map reads as a soft dark plate rather than pitch-black. Not used anywhere outside the map.
+
 ### Gradient System
 Mastercard uses no programmatic gradients in the core UI. The visual impression of "gradient" comes from two places:
 - **Circular image portraits** where a warm-orange photo subject (a card, a sunflower, a beverage) fades to the cream canvas at its edge
@@ -369,6 +372,22 @@ Rules for anything added to this rail going forward:
 - **One scroll container per region, never nested.** Content inside `.transfers-strip__timeline` (e.g. `#agent-timeline`) must not declare its own `overflow-y` / `max-height` — it grows naturally and relies on the parent region as the sole scroll container. A scrollbar nested inside a scrolling ancestor is treated as a bug (#14), not a valid pattern.
 - **The boundary between regions is a static border, not a gap.** `.transfers-strip__list` carries `border-bottom: 1px solid var(--color-border)`, matching the system-wide preference for border lines over shadows for functional delineation (Section 6). Because the border lives on the box itself rather than on scrolled content, it stays visible regardless of scroll position in either region.
 - **Scrollbars are plain CSS, no dependency.** `scrollbar-width/-color` (Firefox) plus `::-webkit-scrollbar*` (Chromium/Safari) give a thin, ink-toned (`rgba(20, 20, 19, 0.22)`) scrollbar affordance consistent across evergreen browsers. A scrollbar-styling library was considered and rejected — two CSS properties already cover the target browsers, so a dependency would add weight without adding capability.
+
+## 11. App-Specific: Ops Map Tonal Filter (#15)
+
+The Ops Map recolors OSM's fully-saturated tiles to a monotone plate by filtering only the Leaflet tile pane (`.map--ink .leaflet-tile-pane`); markers, route lines, tooltips, and the zoom control live in sibling panes and keep their own color. The recipe is seven named tokens in `public/styles/tokens.css`, composed in one `filter` rule in `components.css`:
+
+| Token | Value | Role |
+|-------|-------|------|
+| `--map-tile-grayscale` | `1` | Strips all cartographic hue to neutral greys |
+| `--map-tile-invert` | `0.9` | Flips luminance (dark land, light roads/labels) — pulled back from a full `1` so the flip isn't a stark negative |
+| `--map-tile-brightness` | `0.9` | Sits the plate near Warm Charcoal rather than sinking toward black |
+| `--map-tile-contrast` | `0.78` | Softens the inverted edges into a hazier plate |
+| `--map-tile-sepia` | `0.45` | Re-warms the greys after grayscale/invert |
+| `--map-tile-hue-rotate` | `-8deg` | A gentle rotation that stays on the warm side, not sliding toward cold slate |
+| `--map-tile-saturate` | `0.55` | Kept low — still tonal/monotone, not a multi-color map scheme |
+
+This replaced a starker recipe (`invert(1) brightness(0.82) contrast(0.9) sepia(0.35) hue-rotate(-12deg) saturate(0.6)` on `--color-map-base: #141413`) that read as high-contrast dark-ink rather than "comforting." Route lines and markers use Signal Orange / Light Signal Orange (Section 2), which stay legible against this base since they render in unfiltered sibling panes — any future retuning of these tokens should keep that contrast in mind.
 
 ### Known Gaps
 - The live page uses MarkForMC, a proprietary licensed typeface. Sofia Sans is the closest open-source substitute and is listed in Mastercard's own fallback stack.
