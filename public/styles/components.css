@@ -383,19 +383,61 @@
   background: var(--color-text-charcoal);
 }
 
+/* Threshold above the bar, Buffer below (#18) — a consistent position
+   convention on top of the color coding, so the two read as distinct
+   without needing the legend. */
 .site-card__gauge-mark {
   position: absolute;
-  top: -2px;
   width: 2px;
-  height: 9px;
+  height: 6px;
   border-radius: 1px;
   transform: translateX(-1px);
+  cursor: help;
 }
 .site-card__gauge-mark--threshold {
-  background: var(--color-text-muted);
+  top: -9px;
+  background: var(--color-link); /* Link Blue */
 }
 .site-card__gauge-mark--buffer {
-  background: var(--color-link);
+  top: 100%;
+  margin-top: 2px;
+  background: var(--color-signal-light); /* Light Signal Orange */
+}
+
+/* Custom hover/focus tooltip (#18) — replaces the native `title` tooltip
+   with one styled like the rest of the UI. `content: attr(aria-label)`
+   means the visible tooltip and the accessible name are the same string,
+   with no separate data attribute to keep in sync. Keyboard-reachable via
+   the mark's tabindex, not just mouse hover. */
+.site-card__gauge-mark::after {
+  content: attr(aria-label);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  white-space: nowrap;
+  background: var(--color-ink);
+  color: var(--color-text-on-ink);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 9px;
+  border-radius: var(--radius-chip);
+  box-shadow: var(--shadow-1);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease, transform 120ms ease;
+  z-index: 5;
+}
+.site-card__gauge-mark--threshold::after {
+  bottom: calc(100% + 6px);
+}
+.site-card__gauge-mark--buffer::after {
+  top: calc(100% + 6px);
+  transform: translateX(-50%) translateY(-4px);
+}
+.site-card__gauge-mark:hover::after,
+.site-card__gauge-mark:focus-visible::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 .site-card__stat-legend {

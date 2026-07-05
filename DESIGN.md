@@ -394,7 +394,20 @@ The rail's width is a two-state toggle, not drag-to-resize — the readability c
 
 Anything added to the timeline strip that represents a one-off human action tied to a specific transfer state should follow this pattern (hidden fixture + status-driven `hidden` toggle) rather than rendering unconditionally.
 
-## 11. App-Specific: Ops Map Tonal Filter (#15)
+## 11. App-Specific: Site Card Gauge Markers (#18)
+
+Each `.site-card__gauge` bar carries two tick marks on the same track — Operating Threshold (static hard floor) and Min Buffer (dynamic soft floor). They're distinguished by both color and position, not color alone:
+
+| Marker | Color | Position | Token |
+|--------|-------|----------|-------|
+| Operating Threshold (`.site-card__gauge-mark--threshold`) | Link Blue | Above the bar | `--color-link` (`#3860BE`) |
+| Min Buffer (`.site-card__gauge-mark--buffer`) | Light Signal Orange | Below the bar | `--color-signal-light` (`#F37338`) |
+
+Both colors are existing tokens repurposed here, not new hex values — `--color-signal` (the darker consent/escalation orange) stays reserved for alert states (`.is-low`) per Section 7's "Do's and Don'ts", so the marker uses the lighter accent tone instead.
+
+Hover/focus on either mark shows a custom dark tooltip (ink background, chip radius, Level-1 shadow) instead of the native `title` attribute — `content: attr(aria-label)` in CSS, so the visible tooltip text and the accessible name are always the same string with nothing to keep in sync. Marks are `tabindex="0"` so the tooltip is keyboard-reachable, not just mouse-hover. Because the gauge now contains focusable descendants, its wrapper uses `role="group"` (not `role="img"`, which shouldn't contain interactive children) with the same summary `aria-label` it always had. The numeric legend below the bar (Op. Threshold / Min Buffer values) is unchanged — the tooltip adds a second way to get the exact number, it doesn't replace the legend.
+
+## 12. App-Specific: Ops Map Tonal Filter (#15)
 
 The Ops Map recolors OSM's fully-saturated tiles to a monotone plate by filtering only the Leaflet tile pane (`.map--ink .leaflet-tile-pane`); markers, route lines, tooltips, and the zoom control live in sibling panes and keep their own color. The recipe is seven named tokens in `public/styles/tokens.css`, composed in one `filter` rule in `components.css`:
 
