@@ -39,6 +39,19 @@ export function renderMap(sites, transfers = [], selectedTransferId = null, acti
       bySiteId.has(t.receiverSiteId)
   );
 
+  // A completed transfer has no open route (ACTIVE_ROUTE_STATUSES excludes
+  // it deliberately — nothing is still moving), but selecting one should
+  // still show *where* the asset moved (#20): a static historical record,
+  // not the animated in-progress treatment `selected` above gets.
+  const selectedCompleted = transfers.find(
+    (t) =>
+      t.id === selectedTransferId &&
+      t.status === "completed" &&
+      t.donorSiteId &&
+      bySiteId.has(t.donorSiteId) &&
+      bySiteId.has(t.receiverSiteId)
+  );
+
   transfers
     .filter(
       (t) =>
@@ -59,6 +72,8 @@ export function renderMap(sites, transfers = [], selectedTransferId = null, acti
 
   if (selected) {
     renderSelectedRouteExtras(bySiteId.get(selected.donorSiteId), bySiteId.get(selected.receiverSiteId));
+  } else if (selectedCompleted) {
+    renderCompletedRouteIndicator(bySiteId.get(selectedCompleted.donorSiteId), bySiteId.get(selectedCompleted.receiverSiteId));
   }
 
   const visibleSites = activeSiteTypes ? sites.filter((s) => activeSiteTypes.has(s.siteType)) : sites;
@@ -130,6 +145,38 @@ function renderSelectedRouteExtras(donor, receiver) {
     courierAnimationFrame = requestAnimationFrame(step);
   };
   courierAnimationFrame = requestAnimationFrame(step);
+}
+
+// Completed transfers get a static record of where the asset moved (#20):
+// a dashed arc (own class, not the base .map-route, since that carries the
+// ambient orbit-flow animation reserved for open/active routes) plus one
+// fixed arrowhead at the midpoint pointing donor -> receiver. No courier
+// sweep — nothing is still in motion.
+function renderCompletedRouteIndicator(donor, receiver) {
+  const points = curvedLatLngs(donor, receiver);
+  L.polyline(points, { className: "map-route--completed", interactive: false }).addTo(routeLayer);
+
+  const mid = points[Math.floor(points.length / 2)];
+  const next = points[Math.floor(points.length / 2) + 1] ?? points[points.length - 1];
+  const angleDeg = bearingDeg(mid, next);
+  L.marker(mid, {
+    icon: L.divIcon({
+      className: "map-anno-icon",
+      html: `<span class="map-route-arrow" style="transform: translate(-50%, -50%) rotate(${angleDeg}deg)">${icon("caret-right", "map-route-arrow__icon")}</span>`,
+      iconSize: [0, 0],
+    }),
+    interactive: false,
+  }).addTo(routeLayer);
+}
+
+// Angle (degrees, CSS rotate() convention) a rightward-pointing icon must
+// turn to face from `from` toward `to`. Treats lat/lng as a flat plane
+// (fine at Eastern Singapore's scale, same assumption curvedLatLngs makes)
+// with north = screen-up, so increasing lat maps to decreasing screen-y.
+function bearingDeg(from, to) {
+  const dLat = to[0] - from[0];
+  const dLng = to[1] - from[1];
+  return (Math.atan2(-dLat, dLng) * 180) / Math.PI;
 }
 
 function stopCourierAnimation() {

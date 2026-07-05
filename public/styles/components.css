@@ -683,6 +683,35 @@
   }
 }
 
+/* Completed-transfer route (#20) — deliberately its own class, not
+   .map-route + a modifier, since .map-route always carries the ambient
+   orbit-flow animation. Static and muted (Dust Taupe): a historical record
+   of where the asset moved, not something still happening. Different dash
+   rhythm (2/6 vs the active routes' 3/5) so the two read as different
+   materials even in a single screenshot, not just "animated vs paused". */
+.map-route--completed {
+  fill: none;
+  stroke: var(--color-text-on-ink-muted);
+  stroke-width: 1.6px;
+  stroke-linecap: round;
+  stroke-dasharray: 2 6;
+  opacity: 0.85;
+}
+
+/* Static direction arrowhead at the completed route's midpoint — rotated
+   per-instance via an inline transform (public/js/components/mapView.js
+   computes the bearing), same muted tone as the line it belongs to. */
+.map-route-arrow {
+  position: absolute;
+  display: flex;
+  color: var(--color-text-on-ink-muted);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+}
+.map-route-arrow__icon {
+  width: 16px;
+  height: 16px;
+}
+
 .leaflet-tooltip.map-tooltip {
   background: var(--color-surface);
   color: var(--color-ink);
