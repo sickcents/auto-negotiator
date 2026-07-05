@@ -77,6 +77,11 @@
   --radius-signal: 24px;
   --radius-stadium: 40px;
   --radius-pill: 999px;
+  /* Explicit exception (#22): the Agent Timeline frame (.console-frame) is a
+     mostly-rectangular data panel, not a hero/button shape, and its own
+     child content (tool cards, email docs) already sits in the 6-20px
+     range — the stadium radius read as inconsistent against them. */
+  --radius-frame: 8px;
 
   /* --- Shadow (atmospheric cushioning, never hard-edged) ---------------- */
   --shadow-1: rgba(0, 0, 0, 0.04) 0px 4px 24px 0px;

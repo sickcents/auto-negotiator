@@ -256,13 +256,14 @@ This deliberate emptiness tells the eye "slow down, read one thing at a time" �
 | Radius | Use |
 |--------|-----|
 | 3–6px | Tiny decorative elements, cookie banner micro-chips |
+| **8px** | **Explicit exception (`--radius-frame`, #22)** — the Agent Timeline frame (`.console-frame`) only. It's a mostly-rectangular data panel whose own child content (tool cards, email docs) already sits in the 6–20px range; the stadium radius the rest of this scale would suggest read as inconsistent against them. Not a general addition to the scale — everything else still skips straight from 6px to 20px. |
 | 20px | Primary and secondary body CTAs (the signature button radius) |
 | 24px | Consent/orange pill buttons, modal inner chips |
 | 40px | Hero media frames, large section container corners, H2 pill labels |
 | 50% | Circular portraits, icon-only buttons, satellite CTAs |
 | 99px / 999px / 1000px | Full pill shapes — navigation, carousel cards, footer country selector, primary inline chips |
 
-The scale is unusual: most systems use 4/8/12/16. Mastercard skips those and commits to **either small (≤6), medium-large (20–40), or full-pill (99+)**. The middle ground of 8–12 is absent, which is why the UI feels either "precise and utility" or "soft and editorial" with no in-between.
+The scale is unusual: most systems use 4/8/12/16. Mastercard skips those and commits to **either small (≤6), medium-large (20–40), or full-pill (99+)**. The middle ground of 8–12 is absent, which is why the UI feels either "precise and utility" or "soft and editorial" with no in-between — with one named exception on this app (`--radius-frame`, 8px, the Agent Timeline frame only, #22).
 
 ## 6. Depth & Elevation
 
