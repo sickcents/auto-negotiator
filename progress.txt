@@ -25,3 +25,4 @@
 [25] Network Status: standard scrollbar + breathing room - DONE
 [26] Transfers panel: drag handle instead of expand toggle - DONE
 [27] Prefactor: shared panel-header pattern - DONE
+[28] Site Card legend: color-match Op. Threshold / Min Buffer + spacing - DONE
