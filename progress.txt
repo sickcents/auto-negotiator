@@ -42,3 +42,4 @@
 [40] Simulate Incident panel: group hardware+quantity inputs, reposition trigger button - DONE
 [41] Remove left border from inbound reply documents in the timeline - DONE
 [42] Clarify when Concession Protocol can re-route to the next-best donor - DONE
+[45] Transfers header regressed from flush edge-to-edge back to inset floating card - DONE (expanded scope: also restored the left-rail rename, fixed-height Transfers list, ticket-pill Transfer Detail header, and resize grab tabs — the fuller #34/#35/#40 implementation that had only ever reached the Vercel deployment, never git)
