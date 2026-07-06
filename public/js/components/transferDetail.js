@@ -1,33 +1,34 @@
 import { statusMeta, transferSummary } from "../format.js";
 import { renderAgentConsole } from "./agentConsole.js";
 import { icon } from "../icons.js";
+import { repositionRailGrabTabs } from "./railGrabTabs.js";
 
-// Caret replaces the standard .eyebrow dot (#29) — points down from the
-// transfer row above, reading as "this is that row, expanded" rather than a
-// generic section label. Injected once; the row's own text never changes.
-export function initDetailHeader() {
-  document.getElementById("detail-eyebrow").insertAdjacentHTML("afterbegin", icon("caret-down"));
+// initDetailHeader wires the panel's own close button (#35) — the panel is
+// a dismissable overlay now, not an always-present region, so closing it is
+// this component's own concern rather than something the caller (main.js)
+// reaches in and does by hand.
+export function initDetailHeader(onClose) {
   document.getElementById("detail-close-btn").insertAdjacentHTML("afterbegin", icon("x"));
+  document.getElementById("detail-close-btn").addEventListener("click", onClose);
 }
 
-// Transfer Detail is now its own dismissable floating panel (#35), hidden
-// until a transfer is selected. onClose lets main.js clear selection state
-// (stop polling, drop the row/map highlight) in step with the panel hiding.
-export function initDetailClose(onClose) {
-  document.getElementById("detail-close-btn").addEventListener("click", () => {
-    document.getElementById("transfer-detail").hidden = true;
-    onClose();
-  });
-}
-
-// The timeline strip is always visible (#3/#5) -- this just gives instant
-// feedback on click, before the async GET /transfers/:id resolves. The
-// summary line reuses the exact same wording as the clicked row (#29) so
-// the detail header reads as that row's own content, just expanded.
+// Un-hides the panel (#35) — it starts hidden and only appears once a
+// transfer is selected, closing again via the X button (initDetailHeader)
+// or a fresh selection replacing it. Instant feedback on click, before the
+// async GET /transfers/:id resolves. The summary line reuses the exact same
+// wording as the clicked row (#29) so the detail header reads as that row's
+// own content, just expanded.
 export function markTransferSelected(id, transfer) {
   document.getElementById("transfer-detail").hidden = false;
   document.getElementById("detail-id").textContent = `#${id}`;
-  document.getElementById("detail-summary").textContent = transferSummary(transfer);
+  document.getElementById("detail-summary").textContent = `Request: ${transferSummary(transfer)}`;
+  repositionRailGrabTabs();
+}
+
+// Hides the panel (#35) — the counterpart to markTransferSelected's unhide.
+export function hideTransferDetail() {
+  document.getElementById("transfer-detail").hidden = true;
+  repositionRailGrabTabs();
 }
 
 export function renderTransferDetail(detail) {
