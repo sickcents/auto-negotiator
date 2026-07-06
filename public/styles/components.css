@@ -12,11 +12,10 @@
 }
 
 /* Re-enable interaction on the real panels; the shell and the layout-only
-   .transfers-strip / .side-rail wrappers stay click-through (#35 makes
-   .transfers-strip a pure layout wrapper around two independent panels,
-   same shape as .side-rail around Network Status / Simulate Incident). */
+   .side-rail/.left-rail wrappers stay click-through. */
 .nav-pill,
-.transfers-strip__list,
+.transfers-strip,
+.transfer-detail-panel,
 .floating-panel {
   pointer-events: auto;
 }
@@ -145,27 +144,27 @@
 }
 
 /* Headers whose scroll container already sits inside an outer .panel's own
-   padding (Transfers list, Transfer Detail, Simulate Incident) don't need
-   their own horizontal inset — adding one would double it. Headers whose
-   container zeroes that padding onto its children instead (Network Status,
-   per #23) keep the default side padding above. */
+   padding (Transfer Detail) don't need their own horizontal inset — adding
+   one would double it. Headers whose container zeroes that padding onto its
+   children instead (Network Status, per #23) keep the default side padding
+   above. */
 .panel-header--flush {
   padding-left: 0;
   padding-right: 0;
 }
 
-/* A header that is the first child of a .panel-padded ancestor (Transfers
-   list, Simulate Incident) sits ~24px inside the panel's own padding on
-   every side — miles clear of the panel's rounded corners, unlike Network
-   Status's header, which is genuinely flush against the panel edge (its
-   ancestor's own padding is zeroed, #23/#30) and reads as the panel's own
-   top bar. Design feedback (live, with screenshots): the inset version
-   reads as a separate floating rectangle sitting inside the panel, not
-   the same surface — Network Status's flush, edge-to-edge, rounded-corner
-   header is the one that "looks right" (#34 follow-up).
-   These two modifiers pull such a header back out to the panel's true
-   edge with a negative margin equal to the ambient padding it's sitting
-   inside, then rely on the header's own *unmodified* base padding
+/* A header that is the first child of a .panel-padded ancestor (Simulate
+   Incident) sits ~24px inside the panel's own padding on every side — miles
+   clear of the panel's rounded corners, unlike Network Status's header,
+   which is genuinely flush against the panel edge (its ancestor's own
+   padding is zeroed, #23/#30) and reads as the panel's own top bar. Design
+   feedback (live, with screenshots): the inset version reads as a separate
+   floating rectangle sitting inside the panel, not the same surface —
+   Network Status's flush, edge-to-edge, rounded-corner header is the one
+   that "looks right" (#34 follow-up).
+   This modifier pulls such a header back out to the panel's true edge with
+   a negative margin equal to the ambient padding it's sitting inside, then
+   relies on the header's own *unmodified* base padding
    (`padding: var(--space-3) var(--space-3) var(--space-2)`) to push the
    text back to exactly where it was — the margin and the padding cancel,
    so this changes the header's box position (and lets .panel's
@@ -179,25 +178,31 @@
   margin: calc(-1 * var(--space-3)) calc(-1 * var(--space-3)) 0;
 }
 
-/* Left only — for the Transfers list header, which stays position: sticky
-   (it genuinely needs to pin while transfer rows scroll beneath it, unlike
-   Simulate Incident's --static header above) and shares its scroll
-   container with a persistent scrollbar (#14/#25) on the right. Bleeding
-   the right side would put the header flush against the scrollbar thumb;
-   the container's existing right-side inset (ambient padding + its own
-   scrollbar gutter) is already correct and untouched, so this only
-   restores the header's own left padding that `--flush` zeroes
-   (`--flush`'s `padding-right: 0` is still exactly right and stays in
-   effect). There's no margin-top/padding-top pair here the way
-   --bleed-corner has one: a sticky element's `top: 0` anchors to its
-   scrolling ancestor's *padding* edge, so a negative margin-top trying to
-   pull it above that edge is silently clamped back — the vertical half of
-   this fix instead zeroes .transfers-strip's own padding-top directly
-   (below), which is what actually moves the anchor edge (and thus the
-   sticky header) up to the panel's true top. */
-.panel-header.panel-header--bleed-top-left {
+/* Left + right, no top — for the Transfers list header. Top is already
+   handled by .transfers-strip's own zeroed padding-top (below), so only the
+   horizontal insets need cancelling here (unlike --bleed-corner, which also
+   bleeds top for headers whose ancestor keeps its default padding-top).
+   This was left-only from the #34 follow-up until the #34 third follow-up,
+   on the theory that the header shared its scroll container with a
+   persistent scrollbar (#14/#25) on the right and bleeding that side would
+   put it flush against the scrollbar thumb. The #34 second follow-up split
+   the header out of the scroll container entirely (.transfers-strip__list-body
+   owns the scrollbar now), so that concern no longer applied — leaving it
+   left-only just meant the header stopped ~24px short of the panel's true
+   right edge, reading as a floating rectangle again on that side (found
+   live, by screenshot, against Network Status's fully-flush header).
+   Transfer Detail's header and the Manager Reply / Regional Director
+   Override titles had the same floating-rectangle bug for the same reason
+   and briefly used this class too (#34 third follow-up) — #35 removed the
+   need for it there instead by splitting Transfer Detail into its own
+   zero-padding panel (see .transfer-detail-panel below), so its header now
+   reaches the panel's true edges for free, the same way Network Status's
+   does, with no bleed hack required. */
+.panel-header.panel-header--bleed-sides {
   margin-left: calc(-1 * var(--space-3));
   padding-left: var(--space-3);
+  margin-right: calc(-1 * var(--space-3));
+  padding-right: var(--space-3);
 }
 
 /* Transfer Detail's header shares its scroll container with the Agent
@@ -206,13 +211,16 @@
    the former. Transfer Detail only adopts the shared typography/padding/
    separator here; genuine sticky-ness for it is out of scope (a follow-up
    issue redesigns this header to read as a ticket expansion instead).
-   Also used by Network Status (#30) and Simulate Incident (#34 follow-up),
-   neither of which scroll internally, so sticky positioning is functionally
-   inert for both — and worse than inert once .panel gained overflow:hidden
-   (#34), since that makes the panel itself a scroll container that sticky's
-   `top: 0` then anchors to, clamping the header at the panel's *padding*
-   edge and silently cancelling a --bleed-corner negative margin trying to
-   pull it out to the true edge. --static sidesteps that entirely. */
+   Also used by Network Status (#30), Simulate Incident (#34 follow-up), and
+   the Transfers list, none of which scroll internally — the Transfers list
+   header sits above its own non-scrolling wrapper (.transfers-strip), with
+   only .transfers-strip__list-body scrolling beneath it, so sticky
+   positioning is functionally inert for all three — and worse than inert
+   once .panel gained overflow:hidden (#34), since that makes the panel
+   itself a scroll container that sticky's `top: 0` then anchors to,
+   clamping the header at the panel's *padding* edge and silently cancelling
+   a --bleed-corner negative margin trying to pull it out to the true edge.
+   --static sidesteps that entirely. */
 .panel-header--static {
   position: static;
 }
@@ -230,13 +238,19 @@
 }
 
 /* ==========================================================================
-   Transfers strip — the primary workspace, now a tall left rail (#12).
-   List on top, Transfer Detail below as its own separate floating panel
-   (#35) — a layout-only wrapper (click-through, like .side-rail) around two
-   independent .panel cards, not a panel in its own right.
+   Left rail (#12, #35) — Transfers list and Transfer Detail as two
+   independent floating panels stacked with a gap, the same arrangement
+   .side-rail already uses for Network Status / Simulate Incident. Used to
+   be one continuous card with Transfer Detail reading as the list's own
+   "ticket expansion" (#29/#33) — that shared-panel seam kept producing
+   header inset/gap bugs across three follow-ups on #34 (found live, by
+   screenshot, each time), so #35 splits them into separate panels instead:
+   a real gap now carries the separation, and Transfer Detail gets a close
+   button since it's no longer just an always-present lower half of the
+   list's own card.
    ========================================================================== */
 
-.transfers-strip {
+.left-rail {
   position: absolute;
   left: var(--space-3);
   top: calc(var(--nav-height) + var(--space-3)); /* clears the header bar above it (#21) */
@@ -244,21 +258,19 @@
   width: var(--transfers-strip-width);
   display: flex;
   flex-direction: column;
-  /* Real gap (#35) — Transfer Detail is a separate dismissable panel now,
-     not an expansion continuing directly off the list (#29's old seam), so
-     the two need daylight between them like Network Status / Simulate
-     Incident do in .side-rail. */
   gap: var(--space-3);
-  pointer-events: none; /* children re-enable it; see .app-shell above */
+  pointer-events: none; /* re-enabled on .transfers-strip/.transfer-detail-panel above, matching .side-rail/.floating-panel */
 }
 
 /* Continuous drag-to-resize handle (#26) — replaces the #16 two-state
    expand toggle. The element itself is a wide (12px) invisible hit area on
-   the panel's right edge; ::after draws the grip line, faintly visible at
-   rest so the handle is discoverable without already knowing to hover the
-   exact right-edge pixel range, and considerably stronger on hover/focus/
-   drag so the affordance still "lights up" on interaction (#31). */
-.transfers-strip__resize-handle {
+   the rail's right edge. Lives on the rail itself (not just the Transfers
+   list panel) so dragging resizes both panels' width together (#35). The
+   visible grab tabs are separate elements (.rail-grab-tab, below) — one per
+   panel, not one on this handle — since the two panels aren't the same
+   height and Transfers' own height changes with the detail panel open/closed
+   (#40); their vertical position is computed in railGrabTabs.js. */
+.left-rail__resize-handle {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -267,52 +279,84 @@
   cursor: ew-resize;
   touch-action: none;
   z-index: 3;
-  pointer-events: auto; /* .transfers-strip itself is click-through (#35) */
+  pointer-events: auto;
 }
-.transfers-strip__resize-handle::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 2px;
-  transform: translateX(-50%);
-  border-radius: var(--radius-pill);
-  background: rgba(20, 20, 19, 0.1);
-  transition: background 120ms ease;
-}
-.transfers-strip__resize-handle:hover::after,
-.transfers-strip__resize-handle:focus-visible::after,
-.transfers-strip--resizing .transfers-strip__resize-handle::after {
-  background: rgba(20, 20, 19, 0.22);
-}
-.transfers-strip__resize-handle:focus-visible {
+.left-rail__resize-handle:focus-visible {
   outline: none;
 }
-.transfers-strip--resizing {
+
+/* Grab tab (#40) — a raised pill straddling the rail's edge, reading as a
+   physical tab to grab rather than an invisible full-height strip. `top` is
+   set inline by railGrabTabs.js (centered on the tab's own panel, which
+   this element doesn't otherwise know the height of); pointer-events: none
+   so the actual drag hit area stays the sibling .left-rail__resize-handle,
+   which spans the full rail — clicking/dragging anywhere works the same,
+   these are decoration only. Solid Clay Brown, not a translucent tint
+   (found nearly invisible live — an rgba fill reads as a ghost outline
+   against both the light panel and the dark map behind it); z-index above
+   the panels so the half of the tab overlapping a panel isn't visually lost
+   under it. */
+.rail-grab-tab {
+  position: absolute;
+  z-index: 5;
+  right: -4px;
+  width: 8px;
+  height: 52px;
+  transform: translateY(-50%);
+  border-radius: var(--radius-pill);
+  background: var(--color-clay);
+  border: 1px solid var(--color-signal);
+  box-shadow: var(--shadow-1);
+  pointer-events: none;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+.left-rail__resize-handle:hover ~ .rail-grab-tab,
+.left-rail__resize-handle:focus-visible ~ .rail-grab-tab,
+.left-rail--resizing .rail-grab-tab {
+  background: var(--color-signal);
+  border-color: var(--color-signal-light);
+}
+.left-rail--resizing {
   user-select: none;
 }
 
-/* Non-scrolling wrapper for the header + its scroll region (#34 follow-up):
-   this used to be the scroll container itself, with the sticky header as
-   its first child — meaning the scrollbar spanned the container's full
-   height, including the header's own row, and visibly ran behind/through
-   it (the same bug #30 found and fixed for Network Status). Splitting the
-   header out into a static element and moving overflow-y onto
-   .transfers-strip__list-body fixes it the same way. */
-.transfers-strip__list {
-  flex: 0 1 auto;
-  max-height: 40%;
+/* Transfers list panel — header + its own scroll region, capped short of
+   the rail's full height so there's always room left for the detail panel
+   below when it's open (#35; previously capped via the rail's own flex
+   layout instead of a fixed max-height, back when this panel's sibling was
+   an internal region rather than a separate panel). */
+.transfers-strip {
+  /* flex-shrink: 0 — a shrink factor here competed with the detail panel's
+     own (much taller, unconstrained-by-overflow) auto flex-basis for
+     negative space and lost badly, squashing the list down to a sliver
+     whenever a ticket was open. Fixed in px, not %, and sized to show
+     exactly 3 rows (header + 3 * row height + gaps + bottom padding,
+     measured live) — any more than that just pushes the detail panel
+     further down than it needs to be; the list itself still scrolls for
+     the rest. */
+  flex: 0 0 288px;
+  max-height: 288px;
   display: flex;
   flex-direction: column;
-  /* Zeroed instead of the .panel default (#35, moved down from the old
-     shared .transfers-strip panel): the header stays position: sticky
-     (unlike Simulate Incident's, it genuinely needs to pin while rows
-     scroll beneath it), and sticky's `top: 0` anchors to this panel's own
-     *padding* edge now that .panel's `overflow: hidden` makes it a scroll
-     container. Left/right/bottom stay at the .panel default; only the
+  overflow: hidden;
+  /* Zeroed instead of the .panel default (#34 follow-up): the header stays
+     position: sticky (it genuinely needs to pin while rows scroll beneath
+     it), and sticky's `top: 0` anchors to this panel's own *padding* edge
+     now that `overflow: hidden` makes it a scroll container. Leaving
+     padding-top at the .panel default would anchor the header 24px below
+     the panel's true top — same effect as the corner-flush problem
+     `--bleed-corner` solves with a margin, except a margin can't win here
+     (see .panel-header--bleed-sides above), so the padding itself has to
+     move instead. Left/right/bottom stay at the .panel default; only the
      header sits at this container's true top, so only top needs zeroing. */
   padding-top: 0;
+}
+
+/* When Transfer Detail is closed, let the list use all the rail's height
+   instead of stopping at 55% and leaving dead space below it (#35). */
+.left-rail:has(> .transfer-detail-panel[hidden]) .transfers-strip {
+  flex: 1 1 auto;
+  max-height: none;
 }
 
 .transfers-strip__list-body {
@@ -325,13 +369,38 @@
   padding-right: var(--space-2);
 }
 
-.transfers-strip__timeline {
+/* Transfer Detail panel (#35) — its own floating card now, not a region
+   inside the Transfers list's panel. Zero-padding, same as Network Status
+   (#30): the header (.detail-header, plain .panel-header with no
+   --flush/--bleed-sides needed) sits directly against this panel's own
+   true edges, and .transfer-detail-panel__body supplies the inset for
+   everything below it instead. */
+.transfer-detail-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+/* The [hidden] attribute's UA-stylesheet `display: none` loses to this
+   panel's own `display: flex` above (author rules always beat the UA
+   sheet regardless of selector order/specificity) — without this rule the
+   panel showed even while `hidden`, defeating #35's whole point of it being
+   closed by default until a ticket is clicked. */
+.transfer-detail-panel[hidden] {
+  display: none;
+}
+
+.transfer-detail-panel__body {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  /* Gutter (#25) — matches .transfers-strip__list so the timeline entries
-     don't sit flush against the scrollbar thumb either. */
-  padding-right: var(--space-2);
+  /* Breathing room below the header's border-bottom, matching
+     .floating-panel--network__body (#23) — without it the console frame
+     sits flush against the divider. */
+  margin-top: var(--space-2);
+  padding: 0 var(--space-3) var(--space-3);
 }
 
 /* One scrollbar per logical region (#14): thin, ink-toned, cross-browser via
@@ -342,24 +411,24 @@
    Network Status scroll region matches instead of falling back to the OS
    default. */
 .transfers-strip__list-body,
-.transfers-strip__timeline,
+.transfer-detail-panel__body,
 .floating-panel--network__body {
   scrollbar-width: thin;
   scrollbar-color: rgba(20, 20, 19, 0.22) transparent;
 }
 .transfers-strip__list-body::-webkit-scrollbar,
-.transfers-strip__timeline::-webkit-scrollbar,
+.transfer-detail-panel__body::-webkit-scrollbar,
 .floating-panel--network__body::-webkit-scrollbar {
   width: 6px;
 }
 .transfers-strip__list-body::-webkit-scrollbar-thumb,
-.transfers-strip__timeline::-webkit-scrollbar-thumb,
+.transfer-detail-panel__body::-webkit-scrollbar-thumb,
 .floating-panel--network__body::-webkit-scrollbar-thumb {
   background: rgba(20, 20, 19, 0.22);
   border-radius: var(--radius-pill);
 }
 .transfers-strip__list-body::-webkit-scrollbar-track,
-.transfers-strip__timeline::-webkit-scrollbar-track,
+.transfer-detail-panel__body::-webkit-scrollbar-track,
 .floating-panel--network__body::-webkit-scrollbar-track {
   background: transparent;
 }
@@ -1269,21 +1338,44 @@
    Transfer Detail
    ========================================================================== */
 
-/* Top-aligned (not center) is the one deliberate difference from the shared
-   .panel-header default — the two-line title block (eyebrow + summary)
-   would otherwise vertically center against the single-line status pill in
-   a lopsided way; flex-start keeps the pill level with the eyebrow line. */
-.detail-header {
-  align-items: flex-start;
-}
-
+/* .detail-header now wraps a single full-width child (.detail-header__title)
+   instead of splitting title vs. actions itself: the ticket pill, status
+   pill, and close button all sit in one row (.detail-header__top-row)
+   inside that child, with the summary line below it — so "Completed", the
+   close button, and "Transfer #N" all line up together, and the summary is
+   free to run its own line underneath. */
 .detail-header__title {
+  flex: 1 1 auto;
   min-width: 0; /* lets the summary line truncate instead of overflowing */
 }
 
-/* Groups the status pill with the new close button (#35) so the header's
-   --split layout still has exactly two flex children (title, actions),
-   the same shape it had with just the pill. */
+.detail-header__top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+/* Ticket pill — a transfer is a ticket, so its number gets the same pill
+   treatment as the status pill beside it, not the section-label .eyebrow
+   treatment (no dot, no caret). */
+.ticket-pill {
+  display: inline-block;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 13px; /* 1px less than .status-pill's 4px/14px to net out the added border */
+  border: 1px solid var(--color-ink);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+
+/* Groups the status pill with the close button (#35) as one flex item —
+   with .panel-header--split's justify-content: space-between, a bare third
+   child here would float in the middle of the header instead of sitting
+   next to the close button on the far end. */
 .detail-header__actions {
   display: flex;
   align-items: center;
@@ -1291,43 +1383,32 @@
   flex: none;
 }
 
-/* Small icon-only ghost button — the panel's dismiss control (#35). Sized
-   and inset to sit level with the status pill beside it. */
-.btn-icon {
-  display: inline-flex;
+/* Close button (#35) — top-right of the detail header, alongside the status
+   pill. Ghost/icon-only so it doesn't compete with the pill for weight;
+   .panel-header--split already pushes this trailing group to the far end. */
+.detail-header__close {
+  display: flex;
   align-items: center;
   justify-content: center;
   width: 28px;
   height: 28px;
-  border-radius: var(--radius-button);
-  border: 1px solid transparent;
+  flex: none;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
   background: transparent;
   color: var(--color-text-muted);
   cursor: pointer;
   transition: background 120ms ease, color 120ms ease;
 }
-.btn-icon:hover,
-.btn-icon:focus-visible {
+.detail-header__close:hover,
+.detail-header__close:focus-visible {
   background: var(--color-canvas);
-  color: var(--color-ink);
+  color: var(--color-text-charcoal);
 }
-.btn-icon .ph-icon {
+.detail-header__close .ph-icon {
   width: 16px;
   height: 16px;
-}
-
-/* Reads as "this is the expanded row" (#29): the caret (injected by
-   transferDetail.js, replacing the standard .eyebrow dot) points down from
-   the transfer row above, and the ID text matches the row's own "#N" — the
-   same identity, just larger. */
-.detail-header__eyebrow {
-  margin: 0;
-}
-.detail-header__eyebrow::before {
-  content: none;
-}
-.detail-header__eyebrow .ph-icon {
-  color: var(--color-text-muted);
 }
 
 /* The summary line reuses the exact wording from the transfer row that was
@@ -1352,8 +1433,9 @@
    .detail-header above it. --static for the same reason as .detail-header
    (this scroll container already has a sticky header — the Agent Timeline
    console's — and a second sticky element at top:0 would fight it for the
-   slot); --flush because .transfers-strip__timeline supplies its own
-   horizontal inset already, same as .detail-header. */
+   slot); --flush because .transfer-detail-panel__body supplies its own
+   horizontal inset already (#35 — previously .transfers-strip__timeline,
+   before Transfer Detail became its own panel). */
 .detail-block__title {
   margin: 0 0 8px;
 }
@@ -1384,9 +1466,10 @@
   line-height: 1.55;
   padding: 0 var(--space-3);
   /* No independent scroll region (#14) — this used to nest its own
-     overflow-y:auto inside .transfers-strip__timeline, producing a
-     scrollbar-inside-a-scrollbar. It now grows to full height and relies
-     on the parent as the single scroll container for this section. */
+     overflow-y:auto inside the scroll container above (.transfers-strip__timeline,
+     now .transfer-detail-panel__body, #35), producing a scrollbar-inside-a-
+     scrollbar. It now grows to full height and relies on the parent as the
+     single scroll container for this section. */
   white-space: normal;
 }
 
@@ -1877,25 +1960,33 @@
     position: static;
   }
 
-  .transfers-strip {
+  .left-rail {
     position: static;
     width: auto !important; /* overrides the drag-resize inline style (#26) */
     top: auto;
     bottom: auto;
     pointer-events: auto;
   }
-  /* The pane is already full-width in the stacked mobile/tablet layout, so
-     the resize handle has nothing to do (#16, #26). */
-  .transfers-strip__resize-handle {
+  /* The rail is already full-width in the stacked mobile/tablet layout, so
+     the resize handle has nothing to do (#16, #26) — same for its grab tabs
+     (#40). */
+  .left-rail__resize-handle,
+  .rail-grab-tab {
     display: none;
   }
-  .transfers-strip__list {
+  /* Both panels are content-sized here, not fenced to a share of the fixed-
+     height desktop rail (#35) — the second selector also overrides the
+     fill-available rule that applies when Transfer Detail is closed. */
+  .transfers-strip,
+  .left-rail:has(> .transfer-detail-panel[hidden]) .transfers-strip {
+    flex: none;
     max-height: 240px;
   }
-  .transfers-strip__timeline {
-    /* Just the scroll axis (not the .panel shorthand) so overflow-x stays
-       hidden and the rounded corners keep clipping (#35). */
-    overflow-y: visible;
+  .transfer-detail-panel {
+    flex: none;
+  }
+  .transfer-detail-panel__body {
+    overflow: visible;
   }
 
   .side-rail {

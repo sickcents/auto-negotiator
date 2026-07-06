@@ -6,10 +6,11 @@ import { renderNetworkStatus, initSiteFilter, initSiteCardSelection } from "./co
 import { renderMap, initMapTooltip, panToSite } from "./components/mapView.js";
 import { populateSimSiteOptions, initSimulationControls } from "./components/simulationControls.js";
 import { renderTransferList } from "./components/transferList.js";
-import { markTransferSelected, renderTransferDetail, initDetailHeader, initDetailClose } from "./components/transferDetail.js";
+import { markTransferSelected, renderTransferDetail, initDetailHeader, hideTransferDetail } from "./components/transferDetail.js";
 import { initConsoleCopy } from "./components/agentConsole.js";
 import { initManagerReply } from "./components/managerReply.js";
 import { initTransfersPaneResize } from "./components/transfersPane.js";
+import { initRailGrabTabs } from "./components/railGrabTabs.js";
 import { populateOverrideDonorOptions, initRegionalOverride } from "./components/regionalOverride.js";
 import { renderNavStatus, initNavHeightTracking } from "./components/nav.js";
 import { showToast } from "./components/toast.js";
@@ -78,14 +79,16 @@ function selectTransfer(id) {
   }
 }
 
-// Dismissing the Transfer Detail panel (#35) drops the selection entirely —
-// closing it and re-selecting the same row should re-run the full
-// selectTransfer flow, not silently no-op against a stale selectedTransferId.
-function deselectTransfer() {
+// Dismisses the detail panel (#35) — it's a closeable overlay now, not an
+// always-present region, so closing it also clears the selection driving
+// it: the highlighted list row, the map route highlight, and the poll loop
+// (nothing left selected for it to refresh).
+function closeTransferDetail() {
+  hideTransferDetail();
   state.selectedTransferId = null;
-  stopPolling();
   renderTransferList(state.transfers, { selectedTransferId: null, onSelect: selectTransfer });
   renderMap(state.sites, state.transfers, null, state.siteTypeFilter, state.selectedSiteId);
+  stopPolling();
 }
 
 async function refreshDetail(id) {
@@ -192,9 +195,9 @@ function announceDispatch(transferId, toolResult) {
 initMapTooltip();
 initNavHeightTracking();
 initConsoleCopy();
-initDetailHeader();
-initDetailClose(deselectTransfer);
+initDetailHeader(closeTransferDetail);
 initTransfersPaneResize();
+initRailGrabTabs();
 initSiteFilter({
   onChange: (activeTypes) => {
     state.siteTypeFilter = activeTypes;

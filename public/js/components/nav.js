@@ -14,9 +14,9 @@ export function renderNavStatus(sites, transfers) {
 }
 
 // Publishes the header's real rendered height into --nav-height (#21), so
-// panels pinned below it (.transfers-strip, .side-rail) clear it exactly
-// instead of a hardcoded magic-number offset — including when the header
-// wraps to two lines at narrow widths (the brand/status stack, see the
+// rails pinned below it (.left-rail, .side-rail) clear it exactly instead
+// of a hardcoded magic-number offset — including when the header wraps to
+// two lines at narrow widths (the brand/status stack, see the
 // max-width:599px rule in components.css).
 export function initNavHeightTracking() {
   const nav = document.querySelector(".nav-pill");

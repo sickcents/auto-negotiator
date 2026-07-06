@@ -33,10 +33,10 @@
 
     Component hierarchy (mirrored 1:1 by public/js/components/*):
       ├── Nav                     (live counts pill — top-left)
-      ├── TransfersStrip          (left rail)
+      ├── LeftRail                (left rail, two independent panels)
       │   ├── TransfersPanel          → TransferRow × N
-      │   └── AgentTimeline           → grouped by negotiation state
-      │       ├── ManagerReplyPanel
+      │   └── TransferDetailPanel     (dismissable, #35) → AgentTimeline
+      │       ├── ManagerReplyPanel       grouped by negotiation state
       │       └── RegionalOverridePanel
       ├── MapPanel                (full-bleed background → SiteMarker × N,
       │                            RouteArc × active transfers)
@@ -62,76 +62,83 @@
       <p class="nav-pill__status" id="nav-status">Loading network…</p>
     </header>
 
-    <main class="transfers-strip" aria-label="Transfers">
+    <div class="left-rail" id="left-rail">
       <div
         id="transfers-pane-resize-handle"
-        class="transfers-strip__resize-handle"
+        class="left-rail__resize-handle"
         role="separator"
         aria-orientation="vertical"
         aria-label="Resize transfers panel"
         tabindex="0"
       ></div>
-      <section class="panel transfers-strip__list" aria-label="Transfers list">
-        <h2 class="eyebrow panel-header panel-header--flush panel-header--bleed-top-left panel-header--static" id="transfers-heading">Transfers</h2>
+      <div class="rail-grab-tab" id="transfers-grab-tab" aria-hidden="true"></div>
+      <div class="rail-grab-tab" id="detail-grab-tab" aria-hidden="true" hidden></div>
+
+      <main class="panel transfers-strip" aria-label="Transfers">
+        <h2 class="eyebrow panel-header panel-header--flush panel-header--bleed-sides panel-header--static" id="transfers-heading">Transfers</h2>
         <div class="transfers-strip__list-body">
           <div id="transfer-list" class="transfer-list"></div>
         </div>
-      </section>
+      </main>
 
-      <section class="panel floating-panel floating-panel--detail transfers-strip__timeline" id="transfer-detail" aria-label="Transfer detail" hidden>
-        <div class="detail-header panel-header panel-header--flush panel-header--split panel-header--static">
+      <div class="panel transfer-detail-panel" id="transfer-detail" hidden>
+        <div class="detail-header panel-header panel-header--static">
           <div class="detail-header__title">
-            <p class="eyebrow detail-header__eyebrow" id="detail-eyebrow">Transfer <span id="detail-id">—</span></p>
+            <div class="detail-header__top-row">
+              <p class="ticket-pill">Transfer <span id="detail-id">—</span></p>
+              <div class="detail-header__actions">
+                <p id="detail-status" class="status-pill"></p>
+                <button id="detail-close-btn" class="detail-header__close" aria-label="Close transfer detail"></button>
+              </div>
+            </div>
             <h2 id="detail-summary" class="detail-header__summary">Select a transfer above to see its details.</h2>
           </div>
-          <div class="detail-header__actions">
-            <p id="detail-status" class="status-pill"></p>
-            <button id="detail-close-btn" type="button" class="btn-icon" aria-label="Close transfer detail"></button>
-          </div>
         </div>
 
-        <div class="console-frame">
-          <div class="panel-header panel-header--on-ink panel-header--split">
-            <h3 class="eyebrow eyebrow--on-ink">
-              Agent Timeline
-              <span
-                class="info-hint"
-                tabindex="0"
-                aria-label="Donor re-routing only happens through the Concession Protocol: when a Manager Reply cites a specific, verifiable event, the agent verifies it and re-points this same Transfer at the next-ranked donor. There's no way to trigger this directly."
-                >?</span
-              >
-            </h3>
-            <button id="console-copy-btn" class="btn btn--ghost-on-ink">Copy</button>
+        <div class="transfer-detail-panel__body">
+          <div class="console-frame">
+            <div class="panel-header panel-header--on-ink panel-header--split">
+              <h3 class="eyebrow eyebrow--on-ink">
+                Agent Timeline
+                <span
+                  class="info-hint"
+                  tabindex="0"
+                  aria-label="Donor re-routing only happens through the Concession Protocol: when a Manager Reply cites a specific, verifiable event, the agent verifies it and re-points this same Transfer at the next-ranked donor. There's no way to trigger this directly."
+                  >?</span
+                >
+              </h3>
+              <button id="console-copy-btn" class="btn btn--ghost-on-ink">Copy</button>
+            </div>
+            <div id="agent-timeline" class="agent-timeline">
+              <p class="hint">Select a transfer to see its live agent timeline.</p>
+            </div>
           </div>
-          <div id="agent-timeline" class="agent-timeline">
-            <p class="hint">Select a transfer to see its live agent timeline.</p>
-          </div>
-        </div>
 
-        <div id="manager-reply-block" class="detail-block" hidden>
-          <h3 class="eyebrow panel-header panel-header--flush panel-header--static detail-block__title">Manager Reply Injection</h3>
-          <div class="controls-row">
-            <button class="btn btn--outline preset-btn" data-preset="Huge promo tomorrow, we can't spare anything.">Cites a promo</button>
-            <button class="btn btn--outline preset-btn" data-preset="No, we need everything we have.">Refuses, no reason</button>
-            <button class="btn btn--outline preset-btn" data-preset="Understood, go ahead and take it.">Agrees</button>
+          <div id="manager-reply-block" class="detail-block" hidden>
+            <h3 class="eyebrow panel-header panel-header--flush panel-header--static detail-block__title">Manager Reply Injection</h3>
+            <div class="controls-row">
+              <button class="btn btn--outline preset-btn" data-preset="Huge promo tomorrow, we can't spare anything.">Cites a promo</button>
+              <button class="btn btn--outline preset-btn" data-preset="No, we need everything we have.">Refuses, no reason</button>
+              <button class="btn btn--outline preset-btn" data-preset="Understood, go ahead and take it.">Agrees</button>
+            </div>
+            <div class="controls-row">
+              <input id="reply-text" type="text" placeholder="Type a manager reply..." class="input input--grow" aria-label="Manager reply" />
+              <button id="reply-btn" class="btn btn--primary">Send reply</button>
+            </div>
           </div>
-          <div class="controls-row">
-            <input id="reply-text" type="text" placeholder="Type a manager reply..." class="input input--grow" aria-label="Manager reply" />
-            <button id="reply-btn" class="btn btn--primary">Send reply</button>
-          </div>
-        </div>
 
-        <div id="regional-override-block" class="detail-block" hidden>
-          <h3 class="eyebrow panel-header panel-header--flush panel-header--static detail-block__title">Regional Director Override</h3>
-          <div class="controls-row">
-            <button id="override-approve" class="btn btn--signal">Force-approve current donor</button>
-            <select id="override-donor" class="select" aria-label="Reroute donor"></select>
-            <button id="override-reroute" class="btn btn--signal">Force-reroute</button>
+          <div id="regional-override-block" class="detail-block" hidden>
+            <h3 class="eyebrow panel-header panel-header--flush panel-header--static detail-block__title">Regional Director Override</h3>
+            <div class="controls-row">
+              <button id="override-approve" class="btn btn--signal">Force-approve current donor</button>
+              <select id="override-donor" class="select" aria-label="Reroute donor"></select>
+              <button id="override-reroute" class="btn btn--signal">Force-reroute</button>
+            </div>
+            <p id="override-result" class="hint"></p>
           </div>
-          <p id="override-result" class="hint"></p>
         </div>
       </div>
-    </main>
+    </div>
 
     <aside class="side-rail" aria-label="Network controls">
       <section class="panel floating-panel floating-panel--network" aria-labelledby="network-heading">

@@ -20,7 +20,7 @@ function clampWidth(px) {
 }
 
 export function initTransfersPaneResize() {
-  const pane = document.querySelector(".transfers-strip");
+  const pane = document.querySelector(".left-rail");
   const handle = document.getElementById("transfers-pane-resize-handle");
   if (!pane || !handle) return;
 
@@ -50,7 +50,7 @@ export function initTransfersPaneResize() {
   };
 
   const onPointerUp = (event) => {
-    pane.classList.remove("transfers-strip--resizing");
+    pane.classList.remove("left-rail--resizing");
     try {
       handle.releasePointerCapture(event.pointerId);
     } catch {
@@ -64,7 +64,7 @@ export function initTransfersPaneResize() {
     if (event.button !== 0) return;
     dragStartX = event.clientX;
     dragStartWidth = pane.getBoundingClientRect().width;
-    pane.classList.add("transfers-strip--resizing");
+    pane.classList.add("left-rail--resizing");
     // Best-effort: drag tracking itself relies on the window-level listeners
     // below, not on capture, so a capture failure shouldn't block resizing.
     try {
