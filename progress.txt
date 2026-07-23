@@ -45,3 +45,4 @@
 [45] Transfers header regressed from flush edge-to-edge back to inset floating card - DONE (expanded scope: also restored the left-rail rename, fixed-height Transfers list, ticket-pill Transfer Detail header, and resize grab tabs — the fuller #34/#35/#40 implementation that had only ever reached the Vercel deployment, never git)
 [46] Generate and wire up a webicon/favicon for Auto Negotiator - DONE
 [47] Fix character-by-character text wrapping in Transfer Detail email panel (From/To/Subject rows) - DONE
+[48] Audit Transfer Detail panel padding/margins across all left-rail width states - DONE (found and fixed one additional issue: .donor-tbl overflowing its .tool-card at the rail's narrow end; everything else -- ticket header truncation, #47's meta/badge layout, the sub-1024px stacked breakpoint -- held up)
