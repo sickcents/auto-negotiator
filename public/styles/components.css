@@ -1785,8 +1785,15 @@
   background: var(--color-canvas);
 }
 .email-doc__head {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  /* Flex+wrap, not grid (#47): the meta column needs a hard floor -- a bare
+     1fr grid track shares only whatever the icon/side auto columns don't
+     claim, and a long badge (e.g. "Firmness lock") combined with min-width:0
+     downstream let it collapse to a couple of px, breaking every value
+     character-by-character. Flex-wrap gives the same floor via flex-basis,
+     but degrades by dropping .email-doc__side to its own line instead of
+     overlapping the meta text when even the floor doesn't fit. */
+  display: flex;
+  flex-wrap: wrap;
   align-items: start;
   gap: 10px;
   padding-bottom: 10px;
@@ -1794,6 +1801,7 @@
   border-bottom: 1px solid var(--color-border);
 }
 .email-doc__icon {
+  flex: none;
   width: 1.2em;
   height: 1.2em;
   margin-top: 1px;
@@ -1802,7 +1810,8 @@
 .email-doc__meta {
   display: grid;
   gap: 1px;
-  min-width: 0;
+  flex: 1 1 90px;
+  min-width: 90px;
 }
 .email-doc__row {
   display: flex;
@@ -1816,18 +1825,23 @@
   font-weight: 600;
 }
 .email-doc__v {
+  flex: 1 1 0%;
   color: var(--color-text-charcoal);
   min-width: 0;
-  word-break: break-word;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 /* Groups the badge with its new timestamp (#37) so .email-doc__head's
-   3-column grid (icon / meta / this) doesn't need a 4th column. */
+   flex row (icon / meta / this) doesn't need a dedicated column. margin-left:
+   auto hugs it to the right when it shares the line with meta, and still
+   right-aligns it if it wraps to its own line (#47). */
 .email-doc__side {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 4px;
   flex: none;
+  margin-left: auto;
 }
 
 .email-doc__time {
