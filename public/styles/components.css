@@ -56,7 +56,12 @@
   height: 32px;
   flex: none;
   border-radius: 50%;
-  background: radial-gradient(circle at 32% 30%, var(--color-signal-light), var(--color-ink) 78%);
+  /* App icon (#46) on top, gradient underneath as a fallback while it loads
+     or if it fails -- border-radius clips both layers into the circle. */
+  background-image: url("/icons/favicon-192x192.png"),
+    radial-gradient(circle at 32% 30%, var(--color-signal-light), var(--color-ink) 78%);
+  background-size: cover;
+  background-position: center;
 }
 
 .nav-pill__title {
