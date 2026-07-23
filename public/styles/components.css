@@ -1601,6 +1601,12 @@
   border: 1px solid var(--color-border-on-ink);
   border-radius: var(--radius-button);
   padding: 12px 14px;
+  /* donor-tbl's auto table layout won't shrink columns below their content's
+     natural width (#48) -- at the left-rail's narrow end that pushed the
+     table past this card's own edge instead of respecting it. Scroll the
+     overflow inside the card rather than letting it bleed into the frame. */
+  max-width: 100%;
+  overflow-x: auto;
 }
 .tool-card__head {
   display: flex;
